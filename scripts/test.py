@@ -95,12 +95,13 @@ def add_texture(obj, imgName):
   #mtex.texture = cTex
   slot = mtex.texture_slots.add()
   slot.texture = cTex
-  slot.texture_coords = 'UV'
+  #slot.texture_coords = 'UV'
+  slot.texture_coords = 'GLOBAL'
   slot.use_map_color_diffuse = True 
   slot.use_map_color_emission = True 
   slot.emission_color_factor = 0.5
   slot.use_map_density = True 
-  slot.mapping = 'FLAT'
+  #slot.mapping = 'FLAT'
 
   # Map image to color, this is the default
   #mat.add_texture(texture = imtex, texture_coordinates = 'UV')
