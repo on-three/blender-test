@@ -55,6 +55,22 @@ def delete_scene_objects(scene=None):
   # Remove scene.
   #bpy.data.scenes.remove(scene)
 
+def add_background(filepath):
+  img = bpy.data.images.load(filepath)
+  for area in bpy.context.screen.areas:
+    if area.type == 'VIEW_3D':
+      space_data = area.spaces.active
+      bg = space_data.background_images.new()
+      bg.image = img
+      space_data.show_background_images = True
+      break
+
+  texture = bpy.data.textures.new("Texture.001", 'IMAGE')
+  texture.image = img
+  bpy.data.worlds['World'].active_texture = texture
+  bpy.context.scene.world.texture_slots[0].use_map_horizon = True
+
+
 def add_texture(obj, imgName):
   # Image texture
   #imgPath = '/home/thomas/picture.jpg'
@@ -188,7 +204,8 @@ if __name__ == '__main__':
   wset.gather_method = 'APPROXIMATE'
 
   bpy.ops.mesh.primitive_plane_add(view_align=True,
-    location=[0, 0, -2],
+    radius=3,
+    location=[-4, 4, -2],
     rotation=[0, 0, 0],
     layers=selectLayer(2))
   plane = context.object
@@ -215,6 +232,22 @@ if __name__ == '__main__':
   #camera.location = (0,10,20)
   look_at(camera, text_obj.matrix_world.to_translation()) 
   camera.name = 'Camera'
+
+  add_background('img/test.jpg')
+
+  #bg_file = 'img/test.jpg'
+  #img = bpy.data.images.load(bg_file)
+  #for area in bpy.context.screen.areas:
+  #  if area.type == 'VIEW_3D':
+  #    space_data = area.spaces.active
+  #    bg = space_data.background_images.new()
+  #    bg.image = img
+  #    break
+
+  #bpy.data.scenes['Scene'].render.filepath = bg_file
+  #bpy.context.scene.camera = bpy.data.objects['Camera']
+
+  #bpy.ops.view3d.background_image_add(filepath='img/test.jpg')
 
   # Render to separate file, identified by texture file
   #imageBaseName = bpy.path.basename(imagePath)
