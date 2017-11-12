@@ -8,9 +8,10 @@ SCRIPT ?= $(SCRIPTS_DIR)/test.py
 BLENDER := blender
 
 # tool to view images
-DISPLAY := display
+#DISPLAY := display
+DISPLAY := chromium-browser
 
-IMG ?= $(OUT_DIR)/test.jpg
+IMG ?= $(OUT_DIR)/test.png
 
 run: $(IMG)
 
@@ -18,7 +19,7 @@ $(IMG): $(SCRIPT)
 	mkdir -p $(@D)
 	$(BLENDER) --background --python $< $(IMG)
 
-show: $(IMG)
+view: $(IMG)
 	$(DISPLAY) $<
 
 clean:
