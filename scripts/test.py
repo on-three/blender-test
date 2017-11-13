@@ -264,7 +264,20 @@ if __name__ == '__main__':
   #imageBaseName = bpy.path.basename(imagePath)
   bpy.context.scene.render.filepath = imagePath
 
-  # Render still image, automatically write to output path
-  bpy.ops.render.render(write_still=True)
+  render_video = True
+  if render_video == True:
+    for scene in bpy.data.scenes:
+      scene.render.image_settings.file_format = 'H264'
+      scene.render.ffmpeg.format = 'QUICKTIME'
+      scene.render.image_settings.color_mode = 'RGB'
+      scene.render.ffmpeg.audio_codec = 'AAC'
+      scene.render.ffmpeg.audio_bitrate = 128
+      scene.render.resolution_percentage = 100
+    bpy.context.scene.frame_start = 0
+    bpy.context.scene.frame_end = 24
+    bpy.ops.render.render(animation = True, write_still = False)
+  else:
+    # Render still image, automatically write to output path
+    bpy.ops.render.render(write_still=True)
 
   bpy.ops.wm.quit_blender()
