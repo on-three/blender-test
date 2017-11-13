@@ -69,6 +69,8 @@ def add_background(filepath):
   texture.image = img
   bpy.data.worlds['World'].active_texture = texture
   bpy.context.scene.world.texture_slots[0].use_map_horizon = True
+  bpy.context.scene.world.texture_slots[0].texture_coords = 'VIEW'
+
 
 
 def add_texture(obj, imgName):
@@ -111,8 +113,8 @@ def add_texture(obj, imgName):
   #mtex.texture = cTex
   slot = mtex.texture_slots.add()
   slot.texture = cTex
-  #slot.texture_coords = 'UV'
-  slot.texture_coords = 'GLOBAL'
+  slot.texture_coords = 'UV'
+  #slot.texture_coords = 'GLOBAL'
   slot.use_map_color_diffuse = True 
   slot.use_map_color_emission = True 
   slot.emission_color_factor = 0.5
@@ -190,10 +192,10 @@ if __name__ == '__main__':
 
   # World settings
   world = bpy.context.scene.world
-  world.use_sky_blend = True
-  world.ambient_color = (0.0, 0, 0)
-  world.horizon_color = (0, 0, 0.2)
-  world.zenith_color = (0.04, 0, 0.04)
+  #world.use_sky_blend = True
+  #world.ambient_color = (0.0, 0, 0)
+  #world.horizon_color = (0, 0, 0.2)
+  #world.zenith_color = (0.04, 0, 0.04)
 
   # Environment lighting
   wset = world.light_settings
@@ -204,6 +206,9 @@ if __name__ == '__main__':
   wset.gather_method = 'APPROXIMATE'
 
   bpy.ops.mesh.primitive_plane_add(view_align=True,
+  #bpy.ops.mesh.primitive_grid_add(view_align=True,
+    #x_subdivisions = 1,
+    #y_subdivisions = 1,
     radius=3,
     location=[-4, 4, -2],
     rotation=[0, 0, 0],
@@ -211,13 +216,22 @@ if __name__ == '__main__':
   plane = context.object
   plane.name = 'Plane1'
   bpy.context.scene.layers[2] = True
+  #plane.uvs_rotate()
+  bpy.ops.mesh.uv_texture_add() 
   #plane_mat = bpy.data.materials.new(name="PlaneMaterial")
   #plane.data.materials.append(plane_mat)
   #plane.active_material.diffuse_color = (1, 1, 1)
   #bpy.data.textures.new("PlaneTexture", type='IMAGE')
   add_texture(plane, "img/test.jpg")
-  
-  
+ 
+  # fix the UV coordnates of the plane
+  #for face in ob.data.polygons:
+  #  for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+  #    uv_coords = ob.data.uv_layers.active.data[loop_idx].uv
+  #    #print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
+  #    ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
+
+
   #bpy.ops.mesh.primitive_cube_add(radius=1,
   #  location=[0, 0, 5])
   #cube.name = 'Object1'
