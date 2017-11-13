@@ -5,8 +5,8 @@ from math import pi
 
 def setRenderSettings():
   render = bpy.context.scene.render
-  render.resolution_x = 720
-  render.resolution_y = 576
+  render.resolution_x = 1920
+  render.resolution_y = 1080
   render.resolution_percentage = 100
   render.fps = 24    
   render.use_raytrace = False
@@ -33,6 +33,9 @@ def look_at(obj_camera, point):
   # assume we're using euler rotation
   obj_camera.rotation_euler = rot_quat.to_euler()
 
+  #m1 = [ [1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,5,1] ]
+  #obj_camera.projection_matrix = m1
+
 def delete_scene_objects(scene=None):
   """Delete a scene and all its objects."""
   #
@@ -57,13 +60,13 @@ def delete_scene_objects(scene=None):
 
 def add_background(filepath):
   img = bpy.data.images.load(filepath)
-  for area in bpy.context.screen.areas:
-    if area.type == 'VIEW_3D':
-      space_data = area.spaces.active
-      bg = space_data.background_images.new()
-      bg.image = img
-      space_data.show_background_images = True
-      break
+  #for area in bpy.context.screen.areas:
+  #  if area.type == 'VIEW_3D':
+  #    space_data = area.spaces.active
+  #    bg = space_data.background_images.new()
+  #    bg.image = img
+  #    space_data.show_background_images = True
+  #    break
 
   texture = bpy.data.textures.new("Texture.001", 'IMAGE')
   texture.image = img
@@ -117,6 +120,7 @@ def add_texture(obj, img_path, texture_name):
   #cl_mtex.map_normal = True
 
   obj.data.materials.append(mtex)
+  return (mtex, cTex)
 
 
 def add_billboard(img_path, n, loc=[0,0,0], size=1):
@@ -136,7 +140,12 @@ def add_billboard(img_path, n, loc=[0,0,0], size=1):
   #plane.data.materials.append(plane_mat)
   #plane.active_material.diffuse_color = (1, 1, 1)
   #bpy.data.textures.new(texture_name, type='IMAGE')
-  add_texture(plane, img_path, n + "_texture")
+  (mat, tex) = add_texture(plane, img_path, n + "_texture")
+  # scale the billboard to match image dimensions
+  sz = tex.image.size
+  x = sz[0]
+  y = sz[1]
+  plane.scale = (x, y, 1)
  
 
 
@@ -153,6 +162,7 @@ if __name__ == '__main__':
   
   bpy.ops.object.text_add(location=(0,0,0))
   text_obj = bpy.context.object
+  text_obj.scale = (100, 100, 0)
   tcu = text_obj.data
 
   #print(ob, tcu)
@@ -193,9 +203,14 @@ if __name__ == '__main__':
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
 
-  add_billboard('img/elsa.png', 'billboard1', loc=[-4,4,0], size=3)
-  add_billboard('img/spiderman.png', 'billboard2', loc=[4,4,0], size=3)
- 
+  add_billboard('img/elsa.png', 'billboard1', loc=[-960,525,0], size=0.75)
+  add_billboard('img/spiderman.png', 'billboard2', loc=[960,525,0], size=0.75)
+  add_billboard('img/smugpepe.jpg', 'billboard3', loc=[-960,-525,0], size=0.75)
+  
+  # Add a billboard as a background
+  add_billboard('img/background.jpg', 'background', loc=[0,0,0], size=1)
+
+
   # fix the UV coordnates of the plane
   #for face in ob.data.polygons:
   #  for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
@@ -210,16 +225,20 @@ if __name__ == '__main__':
   #cube = context.object
   
   bpy.ops.object.camera_add(view_align=False,
-    location=[0, 0, 20],
+    location=[0, 0, 30],
     rotation=[0, 0, 0])
     #rotation=[0.436, 0, pi])
+  bpy.context.object.data.type = 'ORTHO'
+  bpy.context.object.data.ortho_scale = 1920.0*2.0
   camera = context.object
   bpy.context.scene.camera = camera
   #camera.location = (0,10,20)
   look_at(camera, text_obj.matrix_world.to_translation()) 
+  #look_at(camera, [0.0, 0.0, 0.0]) 
   camera.name = 'Camera'
 
-  add_background('img/test.jpg')
+
+  #add_background('img/background.jpg')
 
   #bg_file = 'img/test.jpg'
   #img = bpy.data.images.load(bg_file)
