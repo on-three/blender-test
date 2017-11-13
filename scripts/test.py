@@ -73,82 +73,49 @@ def add_background(filepath):
 
 
 
-def add_texture(obj, imgName):
-  # Image texture
-  #imgPath = '/home/thomas/picture.jpg'
-  #imgPath = imgName
-  #img = bpy.data.add_image(imgPath)
-  #imtex = bpy.data.textures.new('ImageTex')
-  #imtex.type = 'IMAGE' 
-  #imtex = imtex.recast_type()
-  #imtex.image = img
+def add_texture(obj, img_path, texture_name):
+  # TODO: check to see if this texture is already loaded
   try:
-    img = bpy.data.images.load(imgName)
+    img = bpy.data.images.load(img_path)
+    #img.alpha_mode = 'STRAIGHT'
+    #img.use_alpha = True
   except:
-    raise NameError("Cannot load image %s" % realpath)
-
-  cTex = bpy.data.textures.new('ColorTex', type = 'IMAGE')
+    raise NameError("Cannot load image %s" % img_path)
+  
+  cTex = bpy.data.textures.new(texture_name, type = 'IMAGE')
   cTex.image = img
 
-  # Marble texture
-  #mbtex = bpy.data.textures.new('MarbleTex')
-  #mbtex.type = 'MARBLE' 
-  #mbtex = mbtex.recast_type()
-  #mbtex.noise_depth = 1
-  #mbtex.noise_size = 1.6
-  #mbtex.noisebasis2 = 'SIN'
-  #mbtex.turbulence = 5
-
-  # Cloud texture
-  #cltex = bpy.data.textures.new('CloudsTex')
-  #cltex.type = 'CLOUDS'
-  # Cloud texture by default, don't need to recast
-  #cltex.noise_basis = 'BLENDER_ORIGINAL'
-  #cltex.noise_size = 1.05
-  #cltex.noise_type = 'SOFT_NOISE'
-
+  aTex = bpy.data.textures.new(texture_name+"-alpha", type = 'IMAGE')
+  aTex.image = img
+  
   # Create new material
-  mtex = bpy.data.materials.new('TexMat')
-  #mat.alpha = 0
-  #mtex.texture = cTex
+  mtex = bpy.data.materials.new(texture_name + '-material')
+  mtex.diffuse_color = (1, 1, 1)
+  mtex.transparency_method = 'Z_TRANSPARENCY'
+  mtex.use_transparency = True
+  mtex.alpha = 0.0
+  
   slot = mtex.texture_slots.add()
   slot.texture = cTex
   slot.texture_coords = 'UV'
-  #slot.texture_coords = 'GLOBAL'
-  slot.use_map_color_diffuse = True 
-  slot.use_map_color_emission = True 
-  slot.emission_color_factor = 0.5
-  slot.use_map_density = True 
+  #slot.use_map_color_diffuse = True 
+  #slot.use_map_color_emission = True
+  slot.use_map_alpha = True
+  #slot.emission_color_factor = 0.5
+  #slot.use_map_density = True 
   #slot.mapping = 'FLAT'
 
-  # Map image to color, this is the default
-  #mat.add_texture(texture = imtex, texture_coordinates = 'UV')
-  #im_mtex = mat.textures[0]
-
-  # Map marble to specularity
-  #mat.add_texture(texture = mbtex, texture_coordinates = 'UV', map_to = 'SPECULARITY')
-  #mb_mtex = mat.textures[1]
+  #aslot = mtex.texture_slots.add()
+  #slot.texture = aTex
+  #slot.texture_coords = 'UV'
+  #slot.use_map_alpha = True
 
   # Map cloud to alpha, reflection and normal, but not diffuse
-  #mat.add_texture(texture = cltex, texture_coordinates = 'UV', map_to = 'ALPHA')
+  #mtex.add_texture(texture = cTex, texture_coordinates = 'UV', map_to = 'ALPHA')
   #cl_mtex = mat.textures[2]
   #cl_mtex.map_reflection = True
   #cl_mtex.map_normal = True
 
-  # Create new material
-  #mat2 = bpy.data.materials.new('Blue')
-  #mat2.diffuse_color = (0.0, 0.0, 1.0)
-  #mat2.specular_color = (1.0, 1.0, 0.0)
-
-  # Pick active object, remove its old material (assume exactly one old material).
-  #ob = bpy.context.object
-  #bpy.ops.object.material_slot_remove()
-
-  # Add the two materials to mesh
-  #me = ob.data
-  #me.add_material(mat)
-  #me.add_material(mat2)
-  #obj.add_material(mat)
   obj.data.materials.append(mtex)
 
 
@@ -169,7 +136,7 @@ def add_billboard(img_path, n, loc=[0,0,0], size=1):
   #plane.data.materials.append(plane_mat)
   #plane.active_material.diffuse_color = (1, 1, 1)
   #bpy.data.textures.new(texture_name, type='IMAGE')
-  add_texture(plane, "img/test.jpg")
+  add_texture(plane, img_path, n + "_texture")
  
 
 
@@ -226,8 +193,8 @@ if __name__ == '__main__':
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
 
-  add_billboard('img/test.jpg', 'billboard1', loc=[-4,4,0], size=3)
-  add_billboard('img/test.jpg', 'billboard2', loc=[4,4,0], size=3)
+  add_billboard('img/elsa.png', 'billboard1', loc=[-4,4,0], size=3)
+  add_billboard('img/spiderman.png', 'billboard2', loc=[4,4,0], size=3)
  
   # fix the UV coordnates of the plane
   #for face in ob.data.polygons:
