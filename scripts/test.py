@@ -152,6 +152,27 @@ def add_texture(obj, imgName):
   obj.data.materials.append(mtex)
 
 
+def add_billboard(img_path, n, loc=[0,0,0], size=1):
+  bpy.ops.mesh.primitive_plane_add(view_align=True,
+  radius=size,
+  location=loc,
+  rotation=[0, 0, 0])
+  #layers=selectLayer(2))
+  plane = context.object
+  plane.name = n
+  bpy.context.scene.layers[2] = True
+  #plane.uvs_rotate()
+  bpy.ops.mesh.uv_texture_add()
+  material_name = n + '-material'
+  texture_name = n + '-texture'
+  #plane_mat = bpy.data.materials.new(name=material_name)
+  #plane.data.materials.append(plane_mat)
+  #plane.active_material.diffuse_color = (1, 1, 1)
+  #bpy.data.textures.new(texture_name, type='IMAGE')
+  add_texture(plane, "img/test.jpg")
+ 
+
+
 if __name__ == '__main__':
   # you can catch command line arguments this way
   imagePath = sys.argv[-1]
@@ -205,24 +226,8 @@ if __name__ == '__main__':
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
 
-  bpy.ops.mesh.primitive_plane_add(view_align=True,
-  #bpy.ops.mesh.primitive_grid_add(view_align=True,
-    #x_subdivisions = 1,
-    #y_subdivisions = 1,
-    radius=3,
-    location=[-4, 4, -2],
-    rotation=[0, 0, 0],
-    layers=selectLayer(2))
-  plane = context.object
-  plane.name = 'Plane1'
-  bpy.context.scene.layers[2] = True
-  #plane.uvs_rotate()
-  bpy.ops.mesh.uv_texture_add() 
-  #plane_mat = bpy.data.materials.new(name="PlaneMaterial")
-  #plane.data.materials.append(plane_mat)
-  #plane.active_material.diffuse_color = (1, 1, 1)
-  #bpy.data.textures.new("PlaneTexture", type='IMAGE')
-  add_texture(plane, "img/test.jpg")
+  add_billboard('img/test.jpg', 'billboard1', loc=[-4,4,0], size=3)
+  add_billboard('img/test.jpg', 'billboard2', loc=[4,4,0], size=3)
  
   # fix the UV coordnates of the plane
   #for face in ob.data.polygons:
