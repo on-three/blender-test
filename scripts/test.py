@@ -162,7 +162,13 @@ if __name__ == '__main__':
   
   bpy.ops.object.text_add(location=(0,0,0))
   text_obj = bpy.context.object
-  text_obj.scale = (100, 100, 0)
+  #text_obj.scale = (100, 100, 0)
+  # scale according to render window height
+  sx = bpy.context.scene.render.resolution_x
+  sy = bpy.context.scene.render.resolution_y
+  # TODO: properly scale text size to DPI
+  sx = sx/10.0
+  text_obj.scale = (sx, sx, 0)
   tcu = text_obj.data
 
   #print(ob, tcu)
