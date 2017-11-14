@@ -151,7 +151,7 @@ def add_billboard(img_path, n, loc=[0,0,0], size=1):
 
 if __name__ == '__main__':
   # you can catch command line arguments this way
-  imagePath = sys.argv[-1]
+  filePath = sys.argv[-1]
 
   context = bpy.context
 
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
   # Render to separate file, identified by texture file
   #imageBaseName = bpy.path.basename(imagePath)
-  bpy.context.scene.render.filepath = imagePath
+  #bpy.context.scene.render.filepath = imagePath
 
   render_video = True
   if render_video == True:
@@ -275,6 +275,8 @@ if __name__ == '__main__':
       scene.render.resolution_percentage = 100
     bpy.context.scene.frame_start = 0
     bpy.context.scene.frame_end = 24
+    #bpy.context.scene.render.filepath = 'out/' + os.path.basename(__file__) + '.mov'
+    bpy.context.scene.render.filepath = filePath
     bpy.ops.render.render(animation = True, write_still = False)
   else:
     # Render still image, automatically write to output path

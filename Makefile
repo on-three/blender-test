@@ -3,24 +3,24 @@
 SCRIPTS_DIR := scripts
 OUT_DIR := out
 
-SCRIPT ?= $(SCRIPTS_DIR)/test.py
+SCRIPT ?= test
+TARGET ?= $(OUT_DIR)/$(SCRIPT).mov
 
-BLENDER := blender
+# tools
+BLENDER ?= blender
+VIDEO_PLAYER ?= mpv
 
 # tool to view images
 #DISPLAY := display
 DISPLAY := chromium-browser
 
-IMG ?= $(OUT_DIR)/test.png
+run: $(TARGET)
 
-run: $(IMG)
-
-$(IMG): $(SCRIPT)
+$(TARGET): $(SCRIPTS_DIR)/$(SCRIPT).py
 	mkdir -p $(@D)
-	$(BLENDER) --background --python $< $(IMG)
-
-view: $(IMG)
-	$(DISPLAY) $<
+	$(BLENDER) --background --python $< $(TARGET)
+	
+play: $(TARGET)
 
 clean:
 	rm -fr $(OUT_DIR)
