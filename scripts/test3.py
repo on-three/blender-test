@@ -173,13 +173,13 @@ if __name__ == '__main__':
   #add_billboard('img/spiderman.png', 'billboard2', loc=[960,525,0], scale=0.75)
   img = add_billboard('img/smugpepe.jpg', 'billboard3', loc=[0,0,0], scale=0.01)
  
-  positions = (1,0,0),(0,1,2),(3,2,1),(3,4,1),(1,2,1)
+  positions = (22,0,0),(0,0,0),(0,0,0),(-22,0,0)
   frame_num = 0
   for position in positions:
     bpy.context.scene.frame_set(frame_num)
     img.location = position
     img.keyframe_insert(data_path="location", index=-1)
-    frame_num += 48
+    frame_num += 24
 
   # Add a billboard as a background
   #add_billboard('img/background.jpg', 'background', loc=[0,0,0], size=1)
@@ -241,8 +241,8 @@ if __name__ == '__main__':
       scene.render.ffmpeg.audio_codec = 'AAC'
       scene.render.ffmpeg.audio_bitrate = 128
       scene.render.resolution_percentage = 100
-    #bpy.context.scene.frame_start = 0
-    #bpy.context.scene.frame_end = 24
+    bpy.context.scene.frame_start = 0
+    bpy.context.scene.frame_end = frame_num
     #bpy.context.scene.render.filepath = 'out/' + os.path.basename(__file__) + '.mov'
     bpy.context.scene.render.filepath = filePath
     bpy.ops.render.render(animation = True, write_still = False)
