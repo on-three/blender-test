@@ -26,15 +26,62 @@ AH 1.820 1.860 1.000000
 SIL 1.870 2.090 1.000000
 """
 
+"""
+standard animation mouth positions are:
+A
+O
+E
+W,R
+T,S
+L,N
+U,Q
+M,B,P
+F,V
+"""
+
+import re
+
+
 class Phoneme(object):
+  SIL = 0
+  A = 1
+  O = 2
+  E = 3
+  W = 4
+  R = 4
+  T = 5
+  S = 5
+  L = 6
+  N = 6
+  U = 7
+  Q = 7
+  M = 8
+  B = 8
+  P = 8
+  F = 9
+  V = 9
   def __init__(sound, start_frame, stop_frame):
     self._sound = sound
     self._start_frame = start_frame
     self.end_frame = end_frame
 
 DEFAULT_PHONEME_MAP = {
-  'SIL' : 'SIL',
-  'AE'  : 'A',
+  'SIL' : Phoneme.SIL,
+  'AE'  : Phoneme.A,
+  'IH'  : Phoneme.E,
+  'TH'  : Phoneme.T,
+  'T'   : Phoneme.T,
+  'AE'  : Phoneme.A,
+  'NG'  : Phoneme.N,
+  'D'   : Phoneme.T,
+  'EH'  : Phoneme.E,
+  'AA'  : Phoneme.A,
+  'F'   : Phoneme.F,
+  'UH'  : Phoneme.U,
+  'EY'  : Phoneme.E,
+  'DH'  : Phoneme.T,
+  'HH'  : Phoneme.E, # ???
+  'AH'  : Phoneme.A,
 }
 
 class Tokenizer(object):
@@ -42,5 +89,18 @@ class Tokenizer(object):
     self._filename = filename
     self._min_threshold = min_threshold
     self._phoneme_map = phoneme_map
+    
+    # SIL 0.000 0.030 1.000000
+    r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
+    #r = re.compile(r'^(?P<phoneme>\W{1,3}) ', re.IGNORECASE)
+    with open(self._filename) as f:
+      for line in f:
+        #print("*** line: " + line)
+        matches = r.match(line)
+        if matches:
+          p = matches.group('phoneme')
+          s = matches.group('start')
+          e = matches.group('end')
+          print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
 
 

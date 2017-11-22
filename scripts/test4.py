@@ -160,6 +160,9 @@ if __name__ == '__main__':
   filePath = sys.argv[-1]
 
   context = bpy.context
+  scene = bpy.context.scene
+  if not scene.sequence_editor:
+    scene.sequence_editor_create()
 
   # clear everything
   delete_scene_objects()
@@ -180,6 +183,18 @@ if __name__ == '__main__':
   wset.ao_blend_type = 'MULTIPLY'
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
+  
+  soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.cia.mp3", 3, 1)
+  end = soundstrip.frame_final_end #frame_duration
+  soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end)
+  end = soundstrip.frame_final_end #end + soundstrip.frame_duration
+  soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.cia.mp3", 3, end)
+  end = soundstrip.frame_final_end #end + soundstrip.frame_duration
+  soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.bane.mp3", 3, end)
+  filepath = "models/person.blend"
+
+  sounds = Tokenizer('audio/1.cia.mp3.phonemes.out.txt')
+
 
   add_pepe = False
   if add_pepe:
