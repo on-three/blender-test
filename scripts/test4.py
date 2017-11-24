@@ -69,10 +69,35 @@ def set_mouth_img(obj, pos):
       #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
 
 
+def returnObjectByName (passedName= ""):
+  r = None
+  obs = bpy.data.objects
+  for ob in obs:
+    if ob.name == passedName:
+      r = ob
+      return r
+  return r
 
 
+#global tokenized phoneme list
+sounds = None
 
-
+def update_phoneme(scene):
+  global sounds
+  print("Frame Change", scene.frame_current)
+  scene = bpy.data.scenes['Scene']
+  frame = scene.frame_current
+  obj = returnObjectByName('mouth')
+  s = sounds.get_sound(frame)
+  set_mouth_img(obj, s.sound())
+  #if frame < :
+  #  scene.camera = bpy.data.objects['Camera.1']
+  #elif frame < 4* 24:
+  #  scene.camera = bpy.data.objects['Camera.2']
+  #elif frame < 6 * 24:
+  #  scene.camera = bpy.data.objects['Camera.3']
+  #else:
+  #  scene.camera = bpy.data.objects['Camera.1']
 
 
 def look_at(obj_camera, point):
@@ -204,6 +229,7 @@ def add_billboard(img_path, n, loc=[0,0,0], scale=1):
 
 
 if __name__ == '__main__':
+  global sounds
   # you can catch command line arguments this way
   filePath = sys.argv[-1]
 
@@ -245,6 +271,8 @@ if __name__ == '__main__':
 
   sounds = Tokenizer('audio/1.cia.mp3.phonemes.out.txt')
 
+  # run a handler on each frame
+  bpy.app.handlers.frame_change_pre.append(update_phoneme)
 
   add_pepe = False
   if add_pepe:
@@ -260,7 +288,7 @@ if __name__ == '__main__':
   else:
     frame_num = 24
 
-  img = add_billboard('img/mouth_front.jpg', 'billboard3', loc=[0,0,0], scale=0.005)
+  img = add_billboard('img/mouth_front.jpg', 'mouth', loc=[0,0,0], scale=0.005)
  
 
   # Add a billboard as a background

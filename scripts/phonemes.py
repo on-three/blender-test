@@ -60,10 +60,14 @@ class Phoneme(object):
   P = 8
   F = 9
   V = 9
-  def __init__(sound, start_frame, stop_frame):
+  def __init__(self, sound, start_frame, end_frame):
     self._sound = sound
     self._start_frame = start_frame
-    self.end_frame = end_frame
+    self._end_frame = end_frame
+    print("created phoneme: " + str(self._sound) + "  start: " + str(self._start_frame) + " end: " + str(self._end_frame))
+
+  def sound(self):
+    return self._sound
 
 DEFAULT_PHONEME_MAP = {
   'SIL' : Phoneme.SIL,
@@ -85,10 +89,12 @@ DEFAULT_PHONEME_MAP = {
 }
 
 class Tokenizer(object):
-  def __init__(self, filename, min_threshold=0.03, phoneme_map=DEFAULT_PHONEME_MAP):
+  def __init__(self, filename, fps=24, min_threshold=0.03, phoneme_map=DEFAULT_PHONEME_MAP):
     self._filename = filename
     self._min_threshold = min_threshold
     self._phoneme_map = phoneme_map
+    self._fps = fps
+    self._phonemes = []
     
     # SIL 0.000 0.030 1.000000
     r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
@@ -99,8 +105,17 @@ class Tokenizer(object):
         matches = r.match(line)
         if matches:
           p = matches.group('phoneme')
-          s = matches.group('start')
-          e = matches.group('end')
+          s = float(matches.group('start'))
+          e = float(matches.group('end'))
           print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
+          self._phonemes.append(Phoneme(self._phoneme_map[p], int(s*self._fps), int(e*self._fps)))
+
+
+  def get_sound(self, frame):
+    for s in self._phonemes:
+      if frame >= s._start_frame and frame <= s._end_frame:
+        print("sound returned: " + str(s.sound()))
+        return s
+    return None
 
 
