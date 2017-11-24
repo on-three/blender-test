@@ -1,32 +1,28 @@
 """
 Example input phonemes file (not optimized)
 
-SIL IH TH AE NG T IH NG D EH AA AA F UH EY IH DH AA NG HH AH SIL
+SIL IH F AE NG D IH EY D EH AA F UH EY DH AA NG HH AH SIL
 SIL 0.000 0.030 1.000000
 IH 0.040 0.130 1.000000
-TH 0.140 0.180 1.000000
+F 0.140 0.180 1.000000
 AE 0.190 0.310 1.000000
-NG 0.320 0.350 1.000000
-T 0.360 0.430 1.000000
-IH 0.440 0.530 1.000000
-NG 0.540 0.580 1.000000
-D 0.590 0.620 1.000000
+NG 0.320 0.340 1.000000
+D 0.350 0.430 1.000000
+IH 0.440 0.480 1.000000
+EY 0.490 0.560 1.000000
+D 0.570 0.620 1.000000
 EH 0.630 0.730 1.000000
-AA 0.740 0.790 1.000000
-AA 0.800 1.030 1.000000
+AA 0.740 1.030 1.000000
 F 1.040 1.120 1.000000
 UH 1.130 1.180 1.000000
-EY 1.190 1.280 1.000000
-IH 1.290 1.360 1.000000
-DH 1.370 1.400 1.000000
+EY 1.190 1.350 1.000000
+DH 1.360 1.400 1.000000
 AA 1.410 1.690 1.000000
 NG 1.700 1.760 1.000000
 HH 1.770 1.810 1.000000
 AH 1.820 1.860 1.000000
 SIL 1.870 2.090 1.000000
-"""
 
-"""
 standard animation mouth positions are:
 A
 O
@@ -43,7 +39,7 @@ import re
 
 
 class Phoneme(object):
-  SIL = 0
+  SIL = 8 # same as m.b.p
   A = 1
   O = 2
   E = 3
@@ -69,6 +65,7 @@ class Phoneme(object):
   def sound(self):
     return self._sound
 
+#SIL IH F AE NG D IH EY D EH AA F UH EY DH AA NG HH AH SIL
 DEFAULT_PHONEME_MAP = {
   'SIL' : Phoneme.SIL,
   'AE'  : Phoneme.A,
@@ -107,7 +104,13 @@ class Tokenizer(object):
           p = matches.group('phoneme')
           s = float(matches.group('start'))
           e = float(matches.group('end'))
+          # attampt to remove 'noise' by only taking phonemes longer than 0.3 seconds
+          # and if there is a previous phoneme, we extend its time to cover this one
           print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
+          if (e - s) <= 0.03:
+            if len(self._phonemes) > 0:
+              self._phonemes[-1]._end_frame = int(e*self._fps)
+            continue
           self._phonemes.append(Phoneme(self._phoneme_map[p], int(s*self._fps), int(e*self._fps)))
 
 

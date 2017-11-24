@@ -27,13 +27,17 @@ def setRenderSettings():
   render.use_sss = False
   return
 
-def set_mouth_img(obj, pos):
+def set_mouth_img(obj, _pos):
   # position 0 mps to silence (SIL) so we can hide the "mouth"
-  if pos == 0:
-    obj.hide = True
-    return
+  #if pos == 0:
+  #  obj.hide = True
+  #  return
 
-  obj.hide = False
+  #obj.hide = False
+
+  # phonemee sounds are one based, but indexes into image are zro based
+  pos = _pos -1
+
   
   # U,V coordinates are reversed in Y direction
   # and pos 0 serves as both "A" and "SIL"
