@@ -28,39 +28,24 @@ def setRenderSettings():
   return
 
 def set_mouth_img(obj, pos):
+  # position 0 mps to silence (SIL) so we can hide the "mouth"
+  if pos == 0:
+    obj.hide = True
+    return
+
+  obj.hide = False
+  
   # U,V coordinates are reversed in Y direction
+  # and pos 0 serves as both "A" and "SIL"
   x1 = (pos % 3) * 0.333
   x2 = x1 + 0.333
-  y2 = 1.0 - (pos/3) * 0.333
+  y2 = 1.0 - int(pos/3) * 0.333
   y1 = y2 - 0.333
   
-  #x1 = (pos % 3) * 0.333
-  #x2 = x1 + 0.333
-  #y1 = (pos/3) * 0.333
-  #y2 = y1 + 0.333
-
-  # img 6 (LOWER LEFT)
-  #img.data.uv_layers.active.data[0].uv = (0.0, 0.0)
-  #img.data.uv_layers.active.data[1].uv = (0.3, 0.0)
-  #img.data.uv_layers.active.data[2].uv = (0.3, 0.3)
-  #img.data.uv_layers.active.data[3].uv = (0.0, 0.3)
-
   obj.data.uv_layers.active.data[0].uv = (x1, y1)
   obj.data.uv_layers.active.data[1].uv = (x2, y1)
   obj.data.uv_layers.active.data[2].uv = (x2, y2)
   obj.data.uv_layers.active.data[3].uv = (x1, y2)
-
-
-  # img 0 (UPPLER LEFT)
-  #img.data.uv_layers.active.data[0].uv = (0.0, 0.6)
-  #img.data.uv_layers.active.data[1].uv = (0.3, 0.6)
-  #img.data.uv_layers.active.data[2].uv = (0.3, 1.0)
-  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
-
-  #img.data.uv_layers.active.data[0].uv = (0.0, 0.6)
-  #img.data.uv_layers.active.data[1].uv = (0.3, 0.6)
-  #img.data.uv_layers.active.data[2].uv = (0.3, 1.0)
-  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
 
   for face in obj.data.polygons:
     for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
