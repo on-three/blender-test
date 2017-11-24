@@ -27,6 +27,54 @@ def setRenderSettings():
   render.use_sss = False
   return
 
+def set_mouth_img(obj, pos):
+  # U,V coordinates are reversed in Y direction
+  x1 = (pos % 3) * 0.333
+  x2 = x1 + 0.333
+  y2 = 1.0 - (pos/3) * 0.333
+  y1 = y2 - 0.333
+  
+  #x1 = (pos % 3) * 0.333
+  #x2 = x1 + 0.333
+  #y1 = (pos/3) * 0.333
+  #y2 = y1 + 0.333
+
+  # img 6 (LOWER LEFT)
+  #img.data.uv_layers.active.data[0].uv = (0.0, 0.0)
+  #img.data.uv_layers.active.data[1].uv = (0.3, 0.0)
+  #img.data.uv_layers.active.data[2].uv = (0.3, 0.3)
+  #img.data.uv_layers.active.data[3].uv = (0.0, 0.3)
+
+  obj.data.uv_layers.active.data[0].uv = (x1, y1)
+  obj.data.uv_layers.active.data[1].uv = (x2, y1)
+  obj.data.uv_layers.active.data[2].uv = (x2, y2)
+  obj.data.uv_layers.active.data[3].uv = (x1, y2)
+
+
+  # img 0 (UPPLER LEFT)
+  #img.data.uv_layers.active.data[0].uv = (0.0, 0.6)
+  #img.data.uv_layers.active.data[1].uv = (0.3, 0.6)
+  #img.data.uv_layers.active.data[2].uv = (0.3, 1.0)
+  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
+
+  #img.data.uv_layers.active.data[0].uv = (0.0, 0.6)
+  #img.data.uv_layers.active.data[1].uv = (0.3, 0.6)
+  #img.data.uv_layers.active.data[2].uv = (0.3, 1.0)
+  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
+
+  for face in obj.data.polygons:
+    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+      uv_coords = obj.data.uv_layers.active.data[loop_idx].uv
+      print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
+      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
+
+
+
+
+
+
+
+
 def look_at(obj_camera, point):
   loc_camera = obj_camera.matrix_world.to_translation()
 
@@ -185,12 +233,14 @@ if __name__ == '__main__':
   wset.gather_method = 'APPROXIMATE'
   
   soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.cia.mp3", 3, 1)
-  end = soundstrip.frame_final_end #frame_duration
-  soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end)
-  end = soundstrip.frame_final_end #end + soundstrip.frame_duration
-  soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.cia.mp3", 3, end)
-  end = soundstrip.frame_final_end #end + soundstrip.frame_duration
-  soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.bane.mp3", 3, end)
+  end_frame = soundstrip.frame_final_end #frame_duration
+  #soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end_frame)
+  end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
+# soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.cia.mp3", 3, end_frame)
+# end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
+# soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.bane.mp3", 3, end_frame)
+# end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
+  
   filepath = "models/person.blend"
 
   sounds = Tokenizer('audio/1.cia.mp3.phonemes.out.txt')
@@ -210,18 +260,56 @@ if __name__ == '__main__':
   else:
     frame_num = 24
 
+  img = add_billboard('img/mouth_front.jpg', 'billboard3', loc=[0,0,0], scale=0.005)
+ 
+
   # Add a billboard as a background
   #add_billboard('img/background.jpg', 'background', loc=[0,0,0], size=1)
 
 
   # fix the UV coordnates of the plane
-  #for face in ob.data.polygons:
-  #  for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-  #    uv_coords = ob.data.uv_layers.active.data[loop_idx].uv
-  #    #print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
-  #    ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
+  for face in img.data.polygons:
+    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+      uv_coords = img.data.uv_layers.active.data[loop_idx].uv
+      print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
+      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
+
+    #face idx: 0, vert idx: 0, uvs: 0.000000, 0.000000
+    #face idx: 0, vert idx: 1, uvs: 1.000000, 0.000000
+    #face idx: 0, vert idx: 3, uvs: 1.000000, 1.000000
+    #face idx: 0, vert idx: 2, uvs: 0.000000, 1.000000
+  
+  #img.data.uv_layers.active.data[0].uv = (0.0, 0.0)
+  #img.data.uv_layers.active.data[1].uv = (1.0, 0.0)
+  #img.data.uv_layers.active.data[2].uv = (1.0, 1.0)
+  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
 
 
+  # img 6 (LOWER LEFT)
+  #img.data.uv_layers.active.data[0].uv = (0.0, 0.0)
+  #img.data.uv_layers.active.data[1].uv = (0.3, 0.0)
+  #img.data.uv_layers.active.data[2].uv = (0.3, 0.3)
+  #img.data.uv_layers.active.data[3].uv = (0.0, 0.3)
+
+  # img 0 (UPPLER LEFT)
+  #img.data.uv_layers.active.data[0].uv = (0.0, 0.6)
+  #img.data.uv_layers.active.data[1].uv = (0.3, 0.6)
+  #img.data.uv_layers.active.data[2].uv = (0.3, 1.0)
+  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
+
+
+  #set_mouth_img(img, 6)
+  #set_mouth_img(img, 0)
+  set_mouth_img(img, 2)
+
+
+#  for face in img.data.polygons:
+#    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+#      uv_coords = img.data.uv_layers.active.data[loop_idx].uv
+#      print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
+#      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
+
+   
   #bpy.ops.mesh.primitive_cube_add(radius=1,
   #  location=[0, 0, 5])
   #cube.name = 'Object1'
@@ -271,7 +359,7 @@ if __name__ == '__main__':
       scene.render.ffmpeg.audio_bitrate = 128
       scene.render.resolution_percentage = 100
     bpy.context.scene.frame_start = 0
-    bpy.context.scene.frame_end = frame_num
+    bpy.context.scene.frame_end = end_frame #frame_num
     #bpy.context.scene.render.filepath = 'out/' + os.path.basename(__file__) + '.mov'
     bpy.context.scene.render.filepath = filePath
     bpy.ops.render.render(animation = True, write_still = False)
