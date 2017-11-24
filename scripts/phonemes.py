@@ -41,6 +41,7 @@ import re
 class Phoneme(object):
   SIL = 8 # same as m.b.p
   A = 1
+  I = 1
   O = 2
   E = 3
   W = 4
@@ -65,7 +66,11 @@ class Phoneme(object):
   def sound(self):
     return self._sound
 
+#SIL K F ER Y UW N SIL
 #SIL IH F AE NG D IH EY D EH AA F UH EY DH AA NG HH AH SIL
+#SIL IH L IH N B IY IH K Z G R UW R EY D HH UH EY UH D B OW SIL
+#SIL Y R UH G EY N G AE AA NG SIL
+
 DEFAULT_PHONEME_MAP = {
   'SIL' : Phoneme.SIL,
   'AE'  : Phoneme.A,
@@ -83,16 +88,34 @@ DEFAULT_PHONEME_MAP = {
   'DH'  : Phoneme.T,
   'HH'  : Phoneme.E, # ???
   'AH'  : Phoneme.A,
+  'K'   : Phoneme.T,
+  'ER'  : Phoneme.R,
+  'Y'   : Phoneme.E,
+  'UW'  : Phoneme.U,
+  'N'   : Phoneme.N,
+  'L'   : Phoneme.L,
+  'N'   : Phoneme.N,
+  'B'   : Phoneme.B,
+  'IY'  : Phoneme.I,
+  'Z'   : Phoneme.T,
+  'G'   : Phoneme.T,
+  'R'   : Phoneme.R,
+  'HH'  : Phoneme.R,
+  'UH'  : Phoneme.U,
+  'OW'  : Phoneme.O,
+  'NG'  : Phoneme.N,
 }
 
 class Tokenizer(object):
-  def __init__(self, filename, fps=24, min_threshold=0.03, phoneme_map=DEFAULT_PHONEME_MAP):
+  def __init__(self, filename, fps=24, speaker=None, start_frame=0, min_threshold=0.035, phoneme_map=DEFAULT_PHONEME_MAP):
     self._filename = filename
+    self._start_frame = start_frame
     self._min_threshold = min_threshold
     self._phoneme_map = phoneme_map
     self._fps = fps
     self._phonemes = []
-    
+    self._speaker = speaker
+
     # SIL 0.000 0.030 1.000000
     r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
     #r = re.compile(r'^(?P<phoneme>\W{1,3}) ', re.IGNORECASE)
@@ -107,12 +130,20 @@ class Tokenizer(object):
           # attampt to remove 'noise' by only taking phonemes longer than 0.3 seconds
           # and if there is a previous phoneme, we extend its time to cover this one
           print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
-          if (e - s) <= 0.03:
+          if (e - s) <= self._min_threshold:
             if len(self._phonemes) > 0:
               self._phonemes[-1]._end_frame = int(e*self._fps)
             continue
-          self._phonemes.append(Phoneme(self._phoneme_map[p], int(s*self._fps), int(e*self._fps)))
+          self._phonemes.append(Phoneme(self._phoneme_map[p],
+            int(s*self._fps) + self._start_frame,
+            int(e*self._fps)+self._start_frame))
 
+  def start_frame(self):
+    return self._start_frame
+
+  def speaker(self):
+    return self._speaker
+    
 
   def get_sound(self, frame):
     for s in self._phonemes:
@@ -121,4 +152,26 @@ class Tokenizer(object):
         return s
     return None
 
+
+class AnimationController(object):
+  def __init__(self, on_frame_handler=None):
+    self._on_frame_handler=on_frame_handler
+    self._utterances = []
+
+  def add_utterance(self, speaker, start_frame, phoneme_file, fps=24):
+    s = Tokenizer(phoneme_file, start_frame=start_frame, speaker=speaker)
+    if s:
+      self._utterances.append(s)
+    print("number of utterances now: " + str(len(self._utterances)))
+
+  def set_on_frame_handler(self, handler):
+    print("SET ON FRAME HANDLER TO " + str(handler))
+    self._on_frame_handler = handler
+
+  def update(self, frame):
+    for u in self._utterances:
+      #x.nothing()
+      s = u.get_sound(frame)
+      if s and self._on_frame_handler:
+        self._on_frame_handler(frame, s)
 

@@ -15,6 +15,9 @@ for x in sys.path:
 
 from phonemes import Phoneme
 from phonemes import Tokenizer
+from phonemes import AnimationController
+
+animation_controller = AnimationController()
 
 def setRenderSettings():
   render = bpy.context.scene.render
@@ -57,7 +60,6 @@ def set_mouth_img(obj, _pos):
       print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
       #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
 
-
 def returnObjectByName (passedName= ""):
   r = None
   obs = bpy.data.objects
@@ -67,27 +69,23 @@ def returnObjectByName (passedName= ""):
       return r
   return r
 
-
-#global tokenized phoneme list
-sounds = None
-
+def on_animation_frame(frame, s):
+  obj = returnObjectByName('mouth')
+  set_mouth_img(obj, s.sound())
+  #set_mouth_img(obj, frame % 9)
+ 
 def update_phoneme(scene):
-  global sounds
-  print("Frame Change", scene.frame_current)
+  global animation_controller
+  #animation_controller.set_on_frame_handler(on_animation_frame)
+  animation_controller._on_frame_handler = on_animation_frame
   scene = bpy.data.scenes['Scene']
   frame = scene.frame_current
-  obj = returnObjectByName('mouth')
-  s = sounds.get_sound(frame)
-  set_mouth_img(obj, s.sound())
-  #if frame < :
-  #  scene.camera = bpy.data.objects['Camera.1']
-  #elif frame < 4* 24:
-  #  scene.camera = bpy.data.objects['Camera.2']
-  #elif frame < 6 * 24:
-  #  scene.camera = bpy.data.objects['Camera.3']
-  #else:
-  #  scene.camera = bpy.data.objects['Camera.1']
+  animation_controller.update(frame)
+  #obj = returnObjectByName('mouth')
+  #set_mouth_img(obj, frame % 9)
+   
 
+#animation_controller.set_on_frame_handler = on_animation_frame
 
 def look_at(obj_camera, point):
   loc_camera = obj_camera.matrix_world.to_translation()
@@ -133,8 +131,7 @@ def add_background(filepath):
   #    bg = space_data.background_images.new()
   #    bg.image = img
   #    space_data.show_background_images = True
-  #    break
-
+  #    bre5k
   texture = bpy.data.textures.new("Texture.001", 'IMAGE')
   texture.image = img
   bpy.data.worlds['World'].active_texture = texture
@@ -218,7 +215,8 @@ def add_billboard(img_path, n, loc=[0,0,0], scale=1):
 
 
 if __name__ == '__main__':
-  global sounds
+  global animation_controller
+
   # you can catch command line arguments this way
   filePath = sys.argv[-1]
 
@@ -246,19 +244,27 @@ if __name__ == '__main__':
   wset.ao_blend_type = 'MULTIPLY'
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
-  
+ 
+  animation_controller.add_utterance("CIA", 0, "audio/1.cia.mp3.phonemes.out.txt")
   soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.cia.mp3", 3, 1)
   end_frame = soundstrip.frame_final_end #frame_duration
-  #soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end_frame)
+
+  animation_controller.add_utterance("BANE", end_frame, "audio/2.bane.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end_frame)
   end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
-# soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.cia.mp3", 3, end_frame)
-# end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
-# soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.bane.mp3", 3, end_frame)
-# end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
+
+  animation_controller.add_utterance("CIA", end_frame, "audio/3.cia.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.cia.mp3", 3, end_frame)
+  end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
+
+  animation_controller.add_utterance("BANE", end_frame, "audio/4.bane.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.bane.mp3", 3, end_frame)
+  end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
   
   filepath = "models/person.blend"
 
-  sounds = Tokenizer('audio/1.cia.mp3.phonemes.out.txt')
+  #sounds = Tokenizer('audio/1.cia.mp3.phonemes.out.txt')
+  #sounds = Tokenizer('audio/4.bane.mp3.phonemes.out.txt')
 
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(update_phoneme)
