@@ -1,0 +1,6 @@
+# a simple script. This is a comment
+CIA: If I take that off, will you die?
+BANE: It would be extremely painful.
+CIA: You're a big guy.
+BANE: For you.
+
