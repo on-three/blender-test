@@ -86,6 +86,7 @@ def main():
   parser = argparse.ArgumentParser(description='Parse simple animation script.')
   parser.add_argument('infile', action="store")
   parser.add_argument('-tts', action="store_true", default=False)
+  parser.add_argument('-o', '--outdir', type=str, default='./audio/')
   #parser.add_argument('-a', action="store_true", default=False)
   #parser.add_argument('-b', action="store", dest="b")
   #parser.add_argument('-c', action="store", dest="c", type=int)
@@ -101,7 +102,7 @@ def main():
     print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
 
   if args.tts:
-    do_tts(script)
+    do_tts(script, out_path=args.outdir)
 
 if __name__ == '__main__':
   main()
