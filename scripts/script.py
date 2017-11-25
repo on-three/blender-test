@@ -55,6 +55,27 @@ class Script(object):
       self._current += 1
     return self._lines[self._current-1]
 
+
+"""
+Generate audio off a script
+ARGS:
+script: parsed script object (see above)
+tool: path to tts tool to use (defaults to gtts-cli)
+
+"""
+def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfile} "{text}"'):
+  print("Generating tts audio files off input script")
+  for line in script:
+    outfile = out_path + str(line._index) + '.' + line._speaker + '.mp3'
+    s = args.format(tool=tool, outfile=outfile, text=line._text)
+    print('Making system call: "%s"' % (s))
+    os.system(s)
+    # if we didn't generate a file, fail
+    if not os.path.isfile(outfile):
+      raise IOError("Could not generate file: %s" % (outfile))
+    print('Wrote file %s' % (outfile))
+
+
 """
   Main provides a tool that generates tts and phoneme files from a script,
   leveraging the classes above, but the classes above should be used
@@ -64,6 +85,7 @@ class Script(object):
 def main():
   parser = argparse.ArgumentParser(description='Parse simple animation script.')
   parser.add_argument('infile', action="store")
+  parser.add_argument('-tts', action="store_true", default=False)
   #parser.add_argument('-a', action="store_true", default=False)
   #parser.add_argument('-b', action="store", dest="b")
   #parser.add_argument('-c', action="store", dest="c", type=int)
@@ -77,6 +99,9 @@ def main():
   script = Script(infile)
   for line in script:
     print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
+
+  if args.tts:
+    do_tts(script)
 
 if __name__ == '__main__':
   main()
