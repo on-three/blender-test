@@ -107,6 +107,8 @@ DEFAULT_PHONEME_MAP = {
   'AY'  : Phoneme.A,
   'W'   : Phoneme.W,
   'AO'  : Phoneme.A,
+  'P'   : Phoneme.P,
+  'AW'  : Phoneme.A,
 }
 
 class Tokenizer(object):

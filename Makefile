@@ -26,7 +26,7 @@ $(AUDIO_DIR)/audio.d: $(SCRIPTS_DIR)/$(SCRIPT)
 
 $(TARGET): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(AUDIO_DIR)/audio.d 
 	mkdir -p $(@D)
-	$(BLENDER) --background --python $< $(TARGET)
+	$(BLENDER) --background --python $< $(SCRIPTS_DIR)/$(SCRIPT) $(OUT_DIR)/$(SCRIPT).mov
 	
 play: $(TARGET)
 

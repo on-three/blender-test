@@ -29,7 +29,7 @@ gen_phoneme_file () {
   HMM_PATH=${MODEL_PATH}/en-us/
   ALLPHONE_FILE=${MODEL_PATH}/en-us-phone.lm.bin
   #ADDITIONAL_ARGS="-time yes -beam 1e-10 -pbeam 1e-10 -lw 0.5"
-  ADDITIONAL_ARGS="-time yes -dither no -beam 1e-10 -pbeam 1e-10 -lw 1.5"
+  ADDITIONAL_ARGS="-time yes -dither no -beam 1e-10 -pbeam 1e-10 -lw 0.5"
 
   OUTFILE=${INFILE}.phonemes.out.txt
 
