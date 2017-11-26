@@ -245,20 +245,20 @@ if __name__ == '__main__':
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
  
-  animation_controller.add_utterance("CIA", 0, "audio/1.cia.mp3.phonemes.out.txt")
-  soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.cia.mp3", 3, 1)
+  animation_controller.add_utterance("CIA", 0, "audio/1.CIA.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.CIA.mp3", 3, 1)
   end_frame = soundstrip.frame_final_end #frame_duration
 
-  animation_controller.add_utterance("BANE", end_frame, "audio/2.bane.mp3.phonemes.out.txt")
-  soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end_frame)
+  animation_controller.add_utterance("BANE", end_frame, "audio/2.BANE.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.BANE.mp3", 3, end_frame)
   end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
 
-  animation_controller.add_utterance("CIA", end_frame, "audio/3.cia.mp3.phonemes.out.txt")
-  soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.cia.mp3", 3, end_frame)
+  animation_controller.add_utterance("CIA", end_frame, "audio/3.CIA.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.CIA.mp3", 3, end_frame)
   end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
 
-  animation_controller.add_utterance("BANE", end_frame, "audio/4.bane.mp3.phonemes.out.txt")
-  soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.bane.mp3", 3, end_frame)
+  animation_controller.add_utterance("BANE", end_frame, "audio/4.BANE.mp3.phonemes.out.txt")
+  soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.BANE.mp3", 3, end_frame)
   end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
   
   filepath = "models/person.blend"
