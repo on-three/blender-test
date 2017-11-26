@@ -220,7 +220,9 @@ if __name__ == '__main__':
   global animation_controller
 
   # you can catch command line arguments this way
+  # arg is the input file (either a script to be parsed or a raw mp3 file)
   script_filepath = sys.argv[-2]
+  # arg is the output file to generate (.mov)
   filePath = sys.argv[-1]
 
   context = bpy.context
@@ -248,28 +250,34 @@ if __name__ == '__main__':
   wset.ao_factor = 0.8
   wset.gather_method = 'APPROXIMATE'
 
-  # load a script passed as argument
-  print("opening file: " + script_filepath)
-  script = Script(script_filepath)
-
-  # TODO: add a character model for each speaker in script
-
-  # add audio for all lines in script
   end_frame = 0
-  #for line in script:
-  for i in range(len(script._lines)):
-    print("line: " + str(i) + " end_frame: " + str(end_frame))
-    line = script._lines[i]
-    audio_file = './audio/' + str(line._index) + '.' + line._speaker + '.mp3'
-    phoneme_file = audio_file + '.phonemes.out.txt'
-    animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
-    soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
-    end_frame = soundstrip.frame_final_end #frame_duration
+  
+  if script_filepath.endswith('txt'):
 
+    # load a script passed as argument
+    print("opening file: " + script_filepath)
+    script = Script(script_filepath)
+
+    # TODO: add a character model for each speaker in script
+
+    # add audio for all lines in script
+    #for line in script:
+    for i in range(len(script._lines)):
+      print("line: " + str(i) + " end_frame: " + str(end_frame))
+      line = script._lines[i]
+      audio_file = './audio/' + str(line._index) + '.' + line._speaker + '.mp3'
+      phoneme_file = audio_file + '.phonemes.out.txt'
+      animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
+      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
+      end_frame = soundstrip.frame_final_end #frame_duration
+
+  else:
+    # assume single input mp3 file for now
  
-  #animation_controller.add_utterance("CIA", 0, "audio/1.CIA.mp3.phonemes.out.txt")
-  #soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.CIA.mp3", 3, 1)
-  #end_frame = soundstrip.frame_final_end #frame_duration
+    phoneme_file = script_filepath + '.phonemes.out.txt'
+    animation_controller.add_utterance("MP3", 0, phoneme_file)
+    soundstrip = scene.sequence_editor.sequences.new_sound("1", script_filepath, 3, 1)
+    end_frame = soundstrip.frame_final_end #frame_duration
 
   #animation_controller.add_utterance("BANE", end_frame, "audio/2.BANE.mp3.phonemes.out.txt")
   #soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.BANE.mp3", 3, end_frame)

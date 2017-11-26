@@ -32,3 +32,8 @@ play: $(TARGET)
 
 clean:
 	rm -fr $(OUT_DIR)
+
+frommp3: $(MP3)
+	mkdir -p $(@D)
+	$(BLENDER) --background --python $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(MP3) $(OUT_DIR)/$(SCRIPT).mov
+	
