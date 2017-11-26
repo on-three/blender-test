@@ -63,7 +63,7 @@ script: parsed script object (see above)
 tool: path to tts tool to use (defaults to gtts-cli)
 
 """
-def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfile} "{text}"'):
+def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfile} \'{text}\''):
   print("Generating tts audio files off input script")
   for line in script:
     outfile = out_path + str(line._index) + '.' + line._speaker + '.mp3'
