@@ -11,20 +11,49 @@ import os.path
 import re
 
 class Line(object):
+  # infer phoneme files via filename
+  PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
+
   def __init__(self, speaker, text, index=0):
     self._speaker = speaker
     self._text = text
     self._index = index
+    self._audio_file = None
+    self._phoneme_file = None
+    
+    # estimate what our audio and phoneme file are
+    self._audio_file = './audio/{index}.{speaker}.mp3'.format(index=str(self._index), speaker=self._speaker)
+    self._phoneme_file = self._audio_file + Line.PHONEME_FILE_SUFFIX
 
   @staticmethod
   def parse(index, line):
+    # parse indivdual lines of dialog for speaker and text
     r = re.compile(r'^(?P<speaker>[^\s:]+):( )?(?P<text>.+)')
+    # parse any string for "stage directions"
+    pd = re.compile(r'\((?P<desc>[^\s():]+):(?P<direction>[^()]+)\)')
+    
     matches = r.match(line)
     if matches:
       speaker = matches.group('speaker')
       text = matches.group('text')
       print("SPEAKER: " + speaker + ' TEXT: ' + text)
-      return Line(speaker, text, index=index)
+
+      new_line = Line(speaker, text, index=index)
+      
+      # see if the line text has any parenthetical directions embedded
+      for d in pd.finditer(text):
+        desc = d.group('desc')
+        direction = None
+        if 'direction' in d.groupdict():
+          direction = d.group('direction').strip()
+        print("Direction: {desc} --> {direction}".format(desc=desc, direction=direction))
+
+        if desc == 'AUDIO':
+          new_line._audio_file = str(direction)
+          new_line._phoneme_file = new_line._audio_file + Line.PHONEME_FILE_SUFFIX
+      
+      return new_line
+
     return None
          
 
@@ -34,11 +63,9 @@ class Script(object):
     self._lines = []
     with open(self._filepath) as f:
       for i, line in enumerate(f):
-        #strip leading and trailing whitespace
-        line = line.strip()
         # eliminate comments
-        if line.startswith('#'):
-          continue
+        line = line.split('#')[0].strip()
+        
         l = Line.parse(i, line)
         if l:
           self._lines.append(l)

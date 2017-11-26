@@ -132,6 +132,7 @@ class Tokenizer(object):
     # SIL 0.000 0.030 1.000000
     r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
     #r = re.compile(r'^(?P<phoneme>\W{1,3}) ', re.IGNORECASE)
+    print("Opening phoneme file at: " + filename)
     with open(self._filename) as f:
       for line in f:
         #print("*** line: " + line)

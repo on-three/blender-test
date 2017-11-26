@@ -220,10 +220,11 @@ if __name__ == '__main__':
   global animation_controller
 
   # you can catch command line arguments this way
-  # arg is the input file (either a script to be parsed or a raw mp3 file)
+  # first arg is the input script file path (txt)
+  # 2nd arg is the output .mov file path
+  # TODO: proper arg handling
   script_filepath = sys.argv[-2]
-  # arg is the output file to generate (.mov)
-  filePath = sys.argv[-1]
+  out_filepath = sys.argv[-1]
 
   context = bpy.context
   scene = bpy.context.scene
@@ -252,32 +253,28 @@ if __name__ == '__main__':
 
   end_frame = 0
   
-  if script_filepath.endswith('txt'):
 
-    # load a script passed as argument
-    print("opening file: " + script_filepath)
-    script = Script(script_filepath)
+  # load a script passed as argument
+  print("opening file: " + script_filepath)
+  script = Script(script_filepath)
 
-    # TODO: add a character model for each speaker in script
+  # TODO: add a character model for each speaker in script
 
-    # add audio for all lines in script
-    #for line in script:
-    for i in range(len(script._lines)):
-      print("line: " + str(i) + " end_frame: " + str(end_frame))
-      line = script._lines[i]
-      audio_file = './audio/' + str(line._index) + '.' + line._speaker + '.mp3'
-      phoneme_file = audio_file + '.phonemes.out.txt'
-      animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
-      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
-      end_frame = soundstrip.frame_final_end #frame_duration
-
-  else:
-    # assume single input mp3 file for now
- 
-    phoneme_file = script_filepath + '.phonemes.out.txt'
-    animation_controller.add_utterance("MP3", 0, phoneme_file)
-    soundstrip = scene.sequence_editor.sequences.new_sound("1", script_filepath, 3, 1)
+  # add audio for all lines in script
+  #for line in script:
+  for i in range(len(script._lines)):
+    print("line: " + str(i) + " end_frame: " + str(end_frame))
+    line = script._lines[i]
+    audio_file = './audio/' + str(line._index) + '.' + line._speaker + '.mp3'
+    if line._audio_file:
+      audio_file = line._audio_file
+    phoneme_file = audio_file + '.phonemes.out.txt'
+    if line._phoneme_file:
+      phoneme_file = line._phoneme_file
+    animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
+    soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
     end_frame = soundstrip.frame_final_end #frame_duration
+
 
   filepath = "models/person.blend"
 
@@ -346,7 +343,7 @@ if __name__ == '__main__':
     bpy.context.scene.frame_start = 0
     bpy.context.scene.frame_end = end_frame #frame_num
     #bpy.context.scene.render.filepath = 'out/' + os.path.basename(__file__) + '.mov'
-    bpy.context.scene.render.filepath = filePath
+    bpy.context.scene.render.filepath = out_filepath
     bpy.ops.render.render(animation = True, write_still = False)
   else:
     # Render still image, automatically write to output path

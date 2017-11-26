@@ -1,3 +1,4 @@
 audio/*
 out
-
+*.swp
+__pycache__
