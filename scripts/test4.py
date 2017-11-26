@@ -279,22 +279,7 @@ if __name__ == '__main__':
     soundstrip = scene.sequence_editor.sequences.new_sound("1", script_filepath, 3, 1)
     end_frame = soundstrip.frame_final_end #frame_duration
 
-  #animation_controller.add_utterance("BANE", end_frame, "audio/2.BANE.mp3.phonemes.out.txt")
-  #soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.BANE.mp3", 3, end_frame)
-  #end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
-
-  #animation_controller.add_utterance("CIA", end_frame, "audio/3.CIA.mp3.phonemes.out.txt")
-  #soundstrip = scene.sequence_editor.sequences.new_sound("3", "audio/3.CIA.mp3", 3, end_frame)
-  #end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
-
-  #animation_controller.add_utterance("BANE", end_frame, "audio/4.BANE.mp3.phonemes.out.txt")
-  #soundstrip = scene.sequence_editor.sequences.new_sound("4", "audio/4.BANE.mp3", 3, end_frame)
-  #end_frame = soundstrip.frame_final_end #end + soundstrip.frame_duration
-  
   filepath = "models/person.blend"
-
-  #sounds = Tokenizer('audio/1.cia.mp3.phonemes.out.txt')
-  #sounds = Tokenizer('audio/4.bane.mp3.phonemes.out.txt')
 
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(update_phoneme)
@@ -318,55 +303,6 @@ if __name__ == '__main__':
 
   # Add a billboard as a background
   #add_billboard('img/background.jpg', 'background', loc=[0,0,0], size=1)
-
-
-  # fix the UV coordnates of the plane
-  for face in img.data.polygons:
-    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-      uv_coords = img.data.uv_layers.active.data[loop_idx].uv
-      print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
-      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
-
-    #face idx: 0, vert idx: 0, uvs: 0.000000, 0.000000
-    #face idx: 0, vert idx: 1, uvs: 1.000000, 0.000000
-    #face idx: 0, vert idx: 3, uvs: 1.000000, 1.000000
-    #face idx: 0, vert idx: 2, uvs: 0.000000, 1.000000
-  
-  #img.data.uv_layers.active.data[0].uv = (0.0, 0.0)
-  #img.data.uv_layers.active.data[1].uv = (1.0, 0.0)
-  #img.data.uv_layers.active.data[2].uv = (1.0, 1.0)
-  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
-
-
-  # img 6 (LOWER LEFT)
-  #img.data.uv_layers.active.data[0].uv = (0.0, 0.0)
-  #img.data.uv_layers.active.data[1].uv = (0.3, 0.0)
-  #img.data.uv_layers.active.data[2].uv = (0.3, 0.3)
-  #img.data.uv_layers.active.data[3].uv = (0.0, 0.3)
-
-  # img 0 (UPPLER LEFT)
-  #img.data.uv_layers.active.data[0].uv = (0.0, 0.6)
-  #img.data.uv_layers.active.data[1].uv = (0.3, 0.6)
-  #img.data.uv_layers.active.data[2].uv = (0.3, 1.0)
-  #img.data.uv_layers.active.data[3].uv = (0.0, 1.0)
-
-
-  #set_mouth_img(img, 6)
-  #set_mouth_img(img, 0)
-  set_mouth_img(img, 2)
-
-
-#  for face in img.data.polygons:
-#    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-#      uv_coords = img.data.uv_layers.active.data[loop_idx].uv
-#      print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
-#      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
-
-   
-  #bpy.ops.mesh.primitive_cube_add(radius=1,
-  #  location=[0, 0, 5])
-  #cube.name = 'Object1'
-  #cube = context.object
   
   bpy.ops.object.camera_add(view_align=False,
     location=[0, 0, 30],
@@ -397,10 +333,6 @@ if __name__ == '__main__':
   #bpy.context.scene.camera = bpy.data.objects['Camera']
 
   #bpy.ops.view3d.background_image_add(filepath='img/test.jpg')
-
-  # Render to separate file, identified by texture file
-  #imageBaseName = bpy.path.basename(imagePath)
-  #bpy.context.scene.render.filepath = imagePath
 
   render_video = True
   if render_video == True:
