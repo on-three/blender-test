@@ -86,14 +86,17 @@ class Script(object):
     return self._lines[self._current-1]
 
 
-"""
-Generate audio off a script
-ARGS:
-script: parsed script object (see above)
-tool: path to tts tool to use (defaults to gtts-cli)
+def do_tts(script, out_path='./audio/',
+            tool='gtts-cli',
+            args='{tool} -o {outfile} {text}',
+            gen_phonemes=False):
+  """
+  Generate audio off a script
+  ARGS:
+  script: parsed script object (see above)
+  tool: path to tts tool to use (defaults to gtts-cli)
 
-"""
-def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfile} {text}'):
+  """
   print("Generating tts audio files off input script")
   for line in script:
     outfile = out_path + str(line._index) + '.' + line._speaker + '.mp3'
@@ -105,6 +108,19 @@ def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfil
     if not os.path.isfile(outfile):
       raise IOError("Could not generate file: %s" % (outfile))
     print('Wrote file %s' % (outfile))
+    if gen_phonemes:
+      do_phonemes(outfile)
+
+def do_phonemes(filepath, out_path='./audio/'):
+  """
+  Generate phoneme files off input audio files
+  ARGS:
+    filepath: path to input audio file
+    out_path: output directory for generated phoeneme file.
+  """
+  cmd = 'scripts/phonemes.sh {filepath}'.format(filepath=filepath)
+  print("Generating phonemes file for input audio file " + filepath)
+  os.system(cmd)
 
 
 """
@@ -117,6 +133,7 @@ def main():
   parser = argparse.ArgumentParser(description='Parse simple animation script.')
   parser.add_argument('infile', action="store")
   parser.add_argument('-tts', action="store_true", default=False)
+  parser.add_argument('-p', action="store_true", default=False)
   parser.add_argument('-o', '--outdir', type=str, default='./audio/')
   #parser.add_argument('-a', action="store_true", default=False)
   #parser.add_argument('-b', action="store", dest="b")
@@ -133,7 +150,7 @@ def main():
     print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
 
   if args.tts:
-    do_tts(script, out_path=args.outdir)
+    do_tts(script, out_path=args.outdir, gen_phonemes=args.p)
 
 if __name__ == '__main__':
   main()
