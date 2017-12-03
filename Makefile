@@ -4,7 +4,7 @@ SCRIPTS_DIR := scripts
 OUT_DIR := out
 AUDIO_DIR := audio
 
-SCRIPT ?= script.txt
+SCRIPT ?= test.txt
 BLENDER_SCRIPT ?= test4
 TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
