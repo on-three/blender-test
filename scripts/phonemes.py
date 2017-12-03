@@ -39,7 +39,7 @@ import re
 
 
 class Phoneme(object):
-  SIL = 8 # same as m.b.p
+  SIL = 0 # same as m.b.p
   A = 1
   I = 1
   O = 2

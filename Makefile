@@ -22,16 +22,18 @@ DISPLAY := chromium-browser
 run: $(TARGET)
 
 # audio dpendency file
-$(AUDIO_DIR)/audio.d: $(SCRIPTS_DIR)/$(SCRIPT)
-	./scripts/script.py $< -tts
-	./scripts/phonemes.sh $(@D)
-	touch $@
+#$(AUDIO_DIR)/audio.d: $(SCRIPTS_DIR)/$(SCRIPT)
+#	./scripts/script.py $< -tts
+#	./scripts/phonemes.sh $(@D)
+#	touch $@
 
 $(TARGET): $(MOV_OUT)
-	$(FFMPEG) -i $< $@
+	$(FFMPEG) -y -i $< $@
 
-$(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(AUDIO_DIR)/audio.d 
+$(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py
 	mkdir -p $(@D)
+	./scripts/script.py $(SCRIPTS_DIR)/$(SCRIPT) -tts
+	./scripts/phonemes.sh $(AUDIO_DIR)
 	$(BLENDER) --background --python $< $(SCRIPTS_DIR)/$(SCRIPT) $@
 	
 play: $(TARGET)

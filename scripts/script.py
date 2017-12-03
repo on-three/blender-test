@@ -9,6 +9,7 @@ files.
 import argparse
 import os.path
 import re
+import pipes
 
 class Line(object):
   # infer phoneme files via filename
@@ -62,13 +63,15 @@ class Script(object):
     self._filepath = filepath
     self._lines = []
     with open(self._filepath) as f:
-      for i, line in enumerate(f):
+      i = 1 # don't enumerate so we can increment by SPEAKER
+      for line in f:
         # eliminate comments
         line = line.split('#')[0].strip()
         
         l = Line.parse(i, line)
         if l:
           self._lines.append(l)
+          i = i + 1
         self._current = 0
 
   def __iter__(self):
@@ -90,11 +93,12 @@ script: parsed script object (see above)
 tool: path to tts tool to use (defaults to gtts-cli)
 
 """
-def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfile} \'{text}\''):
+def do_tts(script, out_path='./audio/', tool='gtts-cli', args='{tool} -o {outfile} {text}'):
   print("Generating tts audio files off input script")
   for line in script:
     outfile = out_path + str(line._index) + '.' + line._speaker + '.mp3'
-    s = args.format(tool=tool, outfile=outfile, text=line._text)
+    l = pipes.quote(line._text)
+    s = args.format(tool=tool, outfile=outfile, text=l)
     print('Making system call: "%s"' % (s))
     os.system(s)
     # if we didn't generate a file, fail

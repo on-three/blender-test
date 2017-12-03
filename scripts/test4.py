@@ -41,15 +41,15 @@ def set_mouth_img(obj, _pos):
   #obj.hide = False
 
   # phonemee sounds are one based, but indexes into image are zro based
-  pos = _pos -1
-
+  #pos = _pos -1
+  pos = _pos
   
   # U,V coordinates are reversed in Y direction
   # and pos 0 serves as both "A" and "SIL"
-  x1 = (pos % 3) * 0.333
-  x2 = x1 + 0.333
-  y2 = 1.0 - int(pos/3) * 0.333
-  y1 = y2 - 0.333
+  x1 = (pos % 4) * 0.25
+  x2 = x1 + 0.25
+  y2 = 1.0 - int(pos/4) * 0.25
+  y1 = y2 - 0.25
   
   obj.data.uv_layers.active.data[0].uv = (x1, y1)
   obj.data.uv_layers.active.data[1].uv = (x2, y1)
@@ -295,11 +295,14 @@ if __name__ == '__main__':
   else:
     frame_num = 24
 
-  img = add_billboard('img/mouth_front.jpg', 'mouth', loc=[0,0,0], scale=0.005)
+  img = add_billboard('img/anime-mouths.png', 'mouth', loc=[1.5,-5.5,0], scale=0.0015)
  
 
   # Add a billboard as a background
-  #add_billboard('img/background.jpg', 'background', loc=[0,0,0], size=1)
+  add_billboard('img/anime-girl-head.png', 'background', loc=[0,0,0], scale=0.004)
+  
+  #bpy.ops.view3d.background_image_add(filepath='img/classroom.jpg')
+  add_billboard('img/classroom.jpg', 'background', loc=[0,0,0], scale=0.015)
   
   bpy.ops.object.camera_add(view_align=False,
     location=[0, 0, 30],
@@ -315,7 +318,7 @@ if __name__ == '__main__':
   camera.name = 'Camera'
 
 
-  add_background('img/background.jpg')
+  #add_background('img/anime-girl-head.png')
 
   #bg_file = 'img/test.jpg'
   #img = bpy.data.images.load(bg_file)
@@ -347,6 +350,7 @@ if __name__ == '__main__':
     bpy.ops.render.render(animation = True, write_still = False)
   else:
     # Render still image, automatically write to output path
+    bpy.context.scene.render.filepath = out_filepath + '.png'
     bpy.ops.render.render(write_still=True)
 
   bpy.ops.wm.quit_blender()
