@@ -19,18 +19,16 @@ from phonemes import AnimationController
 from script import Script
 from script import Line
 
-animation_controller = AnimationController()
+# some simple utilities for blender
+from blender_utils import set_render_settings
+from blender_utils import delete_scene_objects
+from blender_utils import get_object_by_name
+from blender_utils import look_at
+from blender_utils import add_background
+from blender_utils import add_billboard
 
-def setRenderSettings():
-  render = bpy.context.scene.render
-  render.resolution_x = 1920
-  render.resolution_y = 1080
-  render.resolution_percentage = 100
-  render.fps = 24    
-  render.use_raytrace = False
-  #render.use_color_management = True
-  render.use_sss = False
-  return
+
+animation_controller = AnimationController()
 
 def set_mouth_img(obj, _pos):
   # position 0 mps to silence (SIL) so we can hide the "mouth"
@@ -62,17 +60,8 @@ def set_mouth_img(obj, _pos):
       print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
       #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
 
-def returnObjectByName (passedName= ""):
-  r = None
-  obs = bpy.data.objects
-  for ob in obs:
-    if ob.name == passedName:
-      r = ob
-      return r
-  return r
-
 def on_animation_frame(frame, s):
-  obj = returnObjectByName('mouth')
+  obj = get_object_by_name('mouth')
   set_mouth_img(obj, s.sound())
   #set_mouth_img(obj, frame % 9)
  
@@ -86,135 +75,6 @@ def update_phoneme(scene):
   #obj = returnObjectByName('mouth')
   #set_mouth_img(obj, frame % 9)
    
-
-#animation_controller.set_on_frame_handler = on_animation_frame
-
-def look_at(obj_camera, point):
-  loc_camera = obj_camera.matrix_world.to_translation()
-
-  p = Vector(point)
-  direction = p - loc_camera
-  # point the cameras '-Z' and use its 'Y' as up
-  rot_quat = direction.to_track_quat('-Z', 'Y')
-
-  # assume we're using euler rotation
-  obj_camera.rotation_euler = rot_quat.to_euler()
-
-  #m1 = [ [1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,5,1] ]
-  #obj_camera.projection_matrix = m1
-
-def delete_scene_objects(scene=None):
-  """Delete a scene and all its objects."""
-  #
-  # Sort out the scene object.
-  if scene is None:
-    # Not specified: it's the current scene.
-    scene = bpy.context.screen.scene
-  else:
-    if isinstance(scene, str):
-      # Specified by name: get the scene object.
-      scene = bpy.data.scenes[scene]
-    # Otherwise, assume it's a scene object already.
-    #
-  # Remove objects.
-  for object_ in scene.objects:
-    scene.objects.unlink(object_)
-    #object.user_clear()
-    bpy.data.objects.remove(object_)
-  #
-  # Remove scene.
-  #bpy.data.scenes.remove(scene)
-
-def add_background(filepath):
-  img = bpy.data.images.load(filepath)
-  #for area in bpy.context.screen.areas:
-  #  if area.type == 'VIEW_3D':
-  #    space_data = area.spaces.active
-  #    bg = space_data.background_images.new()
-  #    bg.image = img
-  #    space_data.show_background_images = True
-  #    bre5k
-  texture = bpy.data.textures.new("Texture.001", 'IMAGE')
-  texture.image = img
-  bpy.data.worlds['World'].active_texture = texture
-  bpy.context.scene.world.texture_slots[0].use_map_horizon = True
-  bpy.context.scene.world.texture_slots[0].texture_coords = 'VIEW'
-
-
-
-def add_texture(obj, img_path, texture_name):
-  # TODO: check to see if this texture is already loaded
-  try:
-    img = bpy.data.images.load(img_path)
-    #img.alpha_mode = 'STRAIGHT'
-    #img.use_alpha = True
-  except:
-    raise NameError("Cannot load image %s" % img_path)
-  
-  cTex = bpy.data.textures.new(texture_name, type = 'IMAGE')
-  cTex.image = img
-
-  aTex = bpy.data.textures.new(texture_name+"-alpha", type = 'IMAGE')
-  aTex.image = img
-  
-  # Create new material
-  mtex = bpy.data.materials.new(texture_name + '-material')
-  mtex.diffuse_color = (1, 1, 1)
-  mtex.transparency_method = 'Z_TRANSPARENCY'
-  mtex.use_transparency = True
-  mtex.alpha = 0.0
-  
-  slot = mtex.texture_slots.add()
-  slot.texture = cTex
-  slot.texture_coords = 'UV'
-  #slot.use_map_color_diffuse = True 
-  #slot.use_map_color_emission = True
-  slot.use_map_alpha = True
-  #slot.emission_color_factor = 0.5
-  #slot.use_map_density = True 
-  #slot.mapping = 'FLAT'
-
-  #aslot = mtex.texture_slots.add()
-  #slot.texture = aTex
-  #slot.texture_coords = 'UV'
-  #slot.use_map_alpha = True
-
-  # Map cloud to alpha, reflection and normal, but not diffuse
-  #mtex.add_texture(texture = cTex, texture_coordinates = 'UV', map_to = 'ALPHA')
-  #cl_mtex = mat.textures[2]
-  #cl_mtex.map_reflection = True
-  #cl_mtex.map_normal = True
-
-  obj.data.materials.append(mtex)
-  return (mtex, cTex)
-
-
-def add_billboard(img_path, n, loc=[0,0,0], scale=1):
-  bpy.ops.mesh.primitive_plane_add(view_align=True,
-  radius=1,
-  location=loc,
-  rotation=[0, 0, 0])
-  #layers=selectLayer(2))
-  plane = context.object
-  plane.name = n
-  bpy.context.scene.layers[2] = True
-  #plane.uvs_rotate()
-  bpy.ops.mesh.uv_texture_add()
-  material_name = n + '-material'
-  texture_name = n + '-texture'
-  #plane_mat = bpy.data.materials.new(name=material_name)
-  #plane.data.materials.append(plane_mat)
-  #plane.active_material.diffuse_color = (1, 1, 1)
-  #bpy.data.textures.new(texture_name, type='IMAGE')
-  (mat, tex) = add_texture(plane, img_path, n + "_texture")
-  # scale the billboard to match image dimensions
-  sz = tex.image.size
-  x = sz[0]
-  y = sz[1]
-  plane.scale = (x*scale, y*scale, 1)
-  return plane
- 
-
 
 if __name__ == '__main__':
   global animation_controller
@@ -234,15 +94,11 @@ if __name__ == '__main__':
   # clear everything
   delete_scene_objects()
 
-  setRenderSettings()
-  
+  set_render_settings()
+
   # World settings
   world = bpy.context.scene.world
-  #world.use_sky_blend = True
-  #world.ambient_color = (0.0, 0, 0)
-  #world.horizon_color = (0, 0, 0.2)
-  #world.zenith_color = (0.04, 0, 0.04)
-
+  
   # Environment lighting
   wset = world.light_settings
   wset.use_environment_light = True
@@ -253,7 +109,6 @@ if __name__ == '__main__':
 
   end_frame = 0
   
-
   # load a script passed as argument
   print("opening file: " + script_filepath)
   script = Script(script_filepath)
@@ -316,23 +171,6 @@ if __name__ == '__main__':
   look_at(camera, [0,0,0]) 
   #look_at(camera, [0.0, 0.0, 0.0]) 
   camera.name = 'Camera'
-
-
-  #add_background('img/anime-girl-head.png')
-
-  #bg_file = 'img/test.jpg'
-  #img = bpy.data.images.load(bg_file)
-  #for area in bpy.context.screen.areas:
-  #  if area.type == 'VIEW_3D':
-  #    space_data = area.spaces.active
-  #    bg = space_data.background_images.new()
-  #    bg.image = img
-  #    break
-
-  #bpy.data.scenes['Scene'].render.filepath = bg_file
-  #bpy.context.scene.camera = bpy.data.objects['Camera']
-
-  #bpy.ops.view3d.background_image_add(filepath='img/test.jpg')
 
   render_video = True
   if render_video == True:
