@@ -110,16 +110,14 @@ def generate_video():
 
   context = bpy.context
   scene = bpy.context.scene
+  world = bpy.context.scene.world
   if not scene.sequence_editor:
     scene.sequence_editor_create()
 
-  # clear everything
+  # clear everything and set up our scene
   delete_scene_objects()
-
   set_render_settings()
 
-  # World settings
-  world = bpy.context.scene.world
   
   # Environment lighting
   wset = world.light_settings
@@ -134,8 +132,6 @@ def generate_video():
   # load a script passed as argument
   print("opening file: " + script_filepath)
   script = Script(script_filepath)
-
-  # TODO: add a character model for each speaker in script
 
   # add audio for all lines in script
   #for line in script:
@@ -158,42 +154,26 @@ def generate_video():
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(update_phoneme)
 
-  add_pepe = False
-  if add_pepe:
-    img = add_billboard('img/smugpepe.jpg', 'billboard3', loc=[0,0,0], scale=0.01)
- 
-    positions = (22,0,0),(0,0,0),(0,0,0),(-22,0,0)
-    frame_num = 0
-    for position in positions:
-      bpy.context.scene.frame_set(frame_num)
-      img.location = position
-      img.keyframe_insert(data_path="location", index=-1)
-      frame_num += 24
-  else:
-    frame_num = 24
-
+  # add a mouth and a girl anime head
   img = add_billboard('img/anime-mouths.png', 'mouth', loc=[1.5,-5.5,0], scale=0.0015)
- 
-
-  # Add a billboard as a background
   add_billboard('img/anime-girl-head.png', 'background', loc=[0,0,0], scale=0.004)
   
-  #bpy.ops.view3d.background_image_add(filepath='img/classroom.jpg')
+  # and a background
   add_billboard('img/classroom.jpg', 'background', loc=[0,0,0], scale=0.015)
-  
+ 
+  # add a camera
   bpy.ops.object.camera_add(view_align=False,
     location=[0, 0, 30],
     rotation=[0, 0, 0])
-    #rotation=[0.436, 0, pi])
-  #bpy.context.object.data.type = 'ORTHO'
-  #bpy.context.object.data.ortho_scale = 1920.0*2.0
   camera = context.object
   bpy.context.scene.camera = camera
-  #camera.location = (0,10,20)
   look_at(camera, [0,0,0]) 
-  #look_at(camera, [0.0, 0.0, 0.0]) 
   camera.name = 'Camera'
 
+  # TODO: if specified, save the state of blender to generate a .blend file
+
+  # render video
+  # TODO: make video rendering switchable but default on
   render_video = not only_render_image
   if render_video == True:
     for scene in bpy.data.scenes:
