@@ -5,7 +5,7 @@ OUT_DIR := out
 AUDIO_DIR := audio
 
 SCRIPT ?= test.txt
-BLENDER_SCRIPT ?= test4
+BLENDER_SCRIPT ?= generate_video
 TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
 MOV_OUT ?= $(TARGET:$(TARGET_EXT)=.mov)
