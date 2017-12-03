@@ -16,6 +16,11 @@ SCRIPT_ARGS ?=
 ifeq ($(SNAPSHOT), 1)
   SCRIPT_ARGS += --test
 endif
+ifeq ($(NORENDER), 1)
+  SCRIPT_ARGS += --norender
+  SCRIPT_ARGS += -s $(OUT_DIR)/$(SCRIPT).blend
+endif
+
 
 
 # tools

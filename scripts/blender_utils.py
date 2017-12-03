@@ -11,21 +11,6 @@ import sys, os
 from math import pi
 from mathutils import Vector
 
-# prep for and import our local python modules
-#dir = os.path.dirname(bpy.data.filepath)
-#dir = dir_path = os.path.dirname(os.path.realpath(__file__))
-#print("****" + dir)
-#if not dir in sys.path:
-#  sys.path.append(dir)
-#for x in sys.path:
-#  print(">>>" + x)
-
-#from phonemes import Phoneme
-#from phonemes import Tokenizer
-#from phonemes import AnimationController
-#from script import Script
-#from script import Line
-
 def set_render_settings(w=1920, h=1080, scale=100, fps=24):
   """
   Set blender render settings

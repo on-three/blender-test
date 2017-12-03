@@ -99,6 +99,8 @@ def generate_video():
   parser.add_argument('infile', help='Input script txt file.')
   parser.add_argument('-o', '--out', help='Output file path')
   parser.add_argument('-t', '--test', action='store_true', default=False, help='Test run only generating single output image')
+  parser.add_argument('-n', '--norender', action='store_true', default=False, help='Turn off all rendering.')
+  parser.add_argument('-s', '--save', help='Save a blend file of configuration.')
   args = parser.parse_args(_args)
   
   script_filepath = args.infile
@@ -106,6 +108,10 @@ def generate_video():
   if args.out:
     out_filepath = args.out
   only_render_image = args.test
+  no_render = args.norender
+  blendfile_to_save = None
+  if args.save:
+    blendfile_to_save = args.save
 
 
   context = bpy.context
@@ -170,28 +176,31 @@ def generate_video():
   look_at(camera, [0,0,0]) 
   camera.name = 'Camera'
 
-  # TODO: if specified, save the state of blender to generate a .blend file
-
-  # render video
-  # TODO: make video rendering switchable but default on
-  render_video = not only_render_image
-  if render_video == True:
-    for scene in bpy.data.scenes:
-      scene.render.image_settings.file_format = 'H264'
-      scene.render.ffmpeg.format = 'QUICKTIME'
-      scene.render.image_settings.color_mode = 'RGB'
-      scene.render.ffmpeg.audio_codec = 'AAC'
-      scene.render.ffmpeg.audio_bitrate = 128
-      scene.render.resolution_percentage = 100
+  # set up render settings
+  for scene in bpy.data.scenes:
+    scene.render.image_settings.file_format = 'H264'
+    scene.render.ffmpeg.format = 'QUICKTIME'
+    scene.render.image_settings.color_mode = 'RGB'
+    scene.render.ffmpeg.audio_codec = 'AAC'
+    scene.render.ffmpeg.audio_bitrate = 128
+    scene.render.resolution_percentage = 100
     bpy.context.scene.frame_start = 0
     bpy.context.scene.frame_end = end_frame #frame_num
-    #bpy.context.scene.render.filepath = 'out/' + os.path.basename(__file__) + '.mov'
     bpy.context.scene.render.filepath = out_filepath
-    bpy.ops.render.render(animation = True, write_still = False)
-  else:
-    # Render still image, automatically write to output path
-    bpy.context.scene.render.filepath = out_filepath + '.png'
-    bpy.ops.render.render(write_still=True)
+ 
+  if blendfile_to_save:
+    print("Saving script configuration as blend file: " + blendfile_to_save)
+    bpy.ops.wm.save_as_mainfile(filepath=blendfile_to_save)
+
+  # render video
+  if not no_render:
+    render_video = not only_render_image
+    if render_video == True:
+      bpy.ops.render.render(animation = True, write_still = False)
+    else:
+      # Render still image, automatically write to output path
+      bpy.context.scene.render.filepath = out_filepath + '.png'
+      bpy.ops.render.render(write_still=True)
 
   bpy.ops.wm.quit_blender()
 
