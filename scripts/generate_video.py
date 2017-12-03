@@ -1,8 +1,16 @@
+# -*- coding: utf-8 -*-
 # Run as: blender -b <filename> -P <this_script> -- <args>
+"""
+MODULE: generate_video
+AUTHOR: on-three
+EMAIL: on.three.email@gmail.com
+DESC: Use blender to generate a video off a very simple script file
+"""
 import bpy
 import sys, os
 from math import pi
 from mathutils import Vector
+import argparse
 
 # prep for and import our local python modules
 #dir = os.path.dirname(bpy.data.filepath)
@@ -76,15 +84,29 @@ def update_phoneme(scene):
   #set_mouth_img(obj, frame % 9)
    
 
-if __name__ == '__main__':
+def generate_video():
+  """
+  Primary function to generate video via blender
+  """
   global animation_controller
 
-  # you can catch command line arguments this way
-  # first arg is the input script file path (txt)
-  # 2nd arg is the output .mov file path
-  # TODO: proper arg handling
-  script_filepath = sys.argv[-2]
-  out_filepath = sys.argv[-1]
+  # args are passed as a single string, the last command line arg
+  a = sys.argv[-1]
+  a = ' '.join(a.split())
+  _args = a.strip().split(' ')
+  print("Generating Video with command line args: " + str(_args))
+  parser = argparse.ArgumentParser(description='Generate video from input script.')
+  parser.add_argument('infile', help='Input script txt file.')
+  parser.add_argument('-o', '--out', help='Output file path')
+  parser.add_argument('-t', '--test', action='store_true', default=False, help='Test run only generating single output image')
+  args = parser.parse_args(_args)
+  
+  script_filepath = args.infile
+  out_filepath = script_filepath + '.mov'
+  if args.out:
+    out_filepath = args.out
+  only_render_image = args.test
+
 
   context = bpy.context
   scene = bpy.context.scene
@@ -172,7 +194,7 @@ if __name__ == '__main__':
   #look_at(camera, [0.0, 0.0, 0.0]) 
   camera.name = 'Camera'
 
-  render_video = True
+  render_video = not only_render_image
   if render_video == True:
     for scene in bpy.data.scenes:
       scene.render.image_settings.file_format = 'H264'
@@ -192,3 +214,7 @@ if __name__ == '__main__':
     bpy.ops.render.render(write_still=True)
 
   bpy.ops.wm.quit_blender()
+
+
+if __name__ == '__main__':
+  generate_video()

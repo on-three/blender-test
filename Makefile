@@ -10,6 +10,14 @@ TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
 MOV_OUT ?= $(TARGET:$(TARGET_EXT)=.mov)
 
+# some additional args that are passed to blender via
+# the SCRIPT_ARGS variable
+SCRIPT_ARGS ?=
+ifeq ($(SNAPSHOT), 1)
+  SCRIPT_ARGS += --test
+endif
+
+
 # tools
 BLENDER ?= blender
 VIDEO_PLAYER ?= mpv
@@ -33,7 +41,7 @@ $(TARGET): $(MOV_OUT)
 $(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py
 	mkdir -p $(@D)
 	./scripts/script.py $(SCRIPTS_DIR)/$(SCRIPT) -tts -p
-	$(BLENDER) --background --python $< $(SCRIPTS_DIR)/$(SCRIPT) $@
+	$(BLENDER) --background --python $< '$(SCRIPTS_DIR)/$(SCRIPT) --out $@ $(SCRIPT_ARGS)'
 	
 play: $(TARGET)
 

@@ -135,9 +135,6 @@ def main():
   parser.add_argument('-tts', action="store_true", default=False)
   parser.add_argument('-p', action="store_true", default=False)
   parser.add_argument('-o', '--outdir', type=str, default='./audio/')
-  #parser.add_argument('-a', action="store_true", default=False)
-  #parser.add_argument('-b', action="store", dest="b")
-  #parser.add_argument('-c', action="store", dest="c", type=int)
   args = parser.parse_args()
   
   infile = args.infile
