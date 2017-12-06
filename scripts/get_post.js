@@ -1,10 +1,11 @@
 var page = require('webpage').create();
 var system = require('system');
+var fs = require('fs');
 
 var args = system.args
 var url = 'http://google.com'
 var s = '#hplogo'
-var outfile = 'post.png'
+var outfile = 'post'
 
 if(args.length > 1)
 {
@@ -35,16 +36,33 @@ console.log("Outfile: ", outfile);
 page.open(url, function() {
     // being the actual size of the headless browser
     page.viewportSize = { width: 768, height: 1024 };
+    
+    // generate a post image
     var clipRect = page.evaluate(function(s){
       return document.querySelector(s).getBoundingClientRect();
     },s);
+    
     page.clipRect = {
       top:    clipRect.top,
       left:   clipRect.left,
       width:  clipRect.width,
       height: clipRect.height
     };
-      
-    page.render(outfile);
-      phantom.exit();
+    page.render(outfile + '.png');
+    
+    // extract post text
+    var txt = page.evaluate(function(s){
+      return document.querySelector(s).textContent;
+    },s);
+    console.log('TEXT: ', txt);
+
+
+    if(txt.length > 0)
+    {
+      var textFilePath = outfile + '.post.txt';
+      fs.write(textFilePath, txt, 'w');
+    }
+    
+    phantom.exit();
 });
+
