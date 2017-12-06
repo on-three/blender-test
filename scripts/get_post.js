@@ -6,29 +6,30 @@ var args = system.args
 var url = 'https://boards.fireden.net/a/thread/145649654'
 //var s = '#hplogo'
 var s = "#\\31 45650295"
-var file = 'google.png'
+var outfile = 'post.png'
 
 if(args.length > 1)
 {
   url = args[1];
 }
-//if(args.length > 2)
-//{
-//  s = args[2];
-//}
-//if(args.length > 3)
-//{
-//  file = args[3]
-//}
+if(args.length > 2)
+{
+  s = args[2];
+}
+if(args.length > 3)
+{
+  outfile = args[3]
+}
 
-//var s = "#hplogo"      
+console.log("URL: ", url);
+console.log("Selector: ", s);
+console.log("Outfile: ", outfile);
+
 page.open(url, function() {
     // being the actual size of the headless browser
     page.viewportSize = { width: 768, height: 1024 };
     var clipRect = page.evaluate(function(s){
-      //return document.querySelector('#hplogo').getBoundingClientRect();
       return document.querySelector(s).getBoundingClientRect();
-      //var selector = '#hplogo'
     },s);
     page.clipRect = {
       top:    clipRect.top,
@@ -37,6 +38,6 @@ page.open(url, function() {
       height: clipRect.height
     };
       
-    page.render(file);
+    page.render(outfile);
       phantom.exit();
 });
