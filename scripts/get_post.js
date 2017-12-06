@@ -2,10 +2,10 @@ var page = require('webpage').create();
 var system = require('system');
 
 var args = system.args
-//var url = 'http://google.com'
-var url = 'https://boards.fireden.net/a/thread/145649654'
-//var s = '#hplogo'
-var s = "#\\31 45650295"
+var url = 'http://google.com'
+//var url = 'https://boards.fireden.net/a/thread/145649654'
+var s = '#hplogo'
+//var s = "#\\31 45650295"
 var outfile = 'post.png'
 
 if(args.length > 1)
@@ -15,6 +15,14 @@ if(args.length > 1)
 if(args.length > 2)
 {
   s = args[2];
+  var r = new RegExp("^\#[0-9]{1}");
+  if(r.test(s))
+  {
+    s = s.substring(1, s.length);
+    var n = s.substring(0, 1);
+    s = s.substring(1, s.length);
+    s = '#\\3' + n + ' ' + s;
+  }
 }
 if(args.length > 3)
 {
