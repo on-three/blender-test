@@ -33,12 +33,37 @@ console.log("URL: ", url);
 console.log("Selector: ", s);
 console.log("Outfile: ", outfile);
 
-phantom.addCookie({
-  'name': 'foolframe_2q1_theme',
-  'value': 'foolz%2Ffoolfuuka-theme-yotsubatwo%2Fyotsuba-b',
-  'domain': 'boards.fireden.net'
-});
+// Set cookies depending upon estimated board archive
+// this is to ensure proper recognizable theme
+var blue_board_regex = new RegExp("\/tv\/|\/a/\|\/fit\/|\/wsg\/|\/v\/|\/jp\/");
+if(blue_board_regex.test(url))
+{
+  phantom.addCookie({
+    'name': 'foolframe_2q1_theme',
+    'value': 'foolz%2Ffoolfuuka-theme-yotsubatwo%2Fyotsuba-b',
+    'domain': 'boards.fireden.net'
+  });
 
+  phantom.addCookie({
+    'name': 'foolframe_5SU_theme',
+    'value': 'foolz%2Ffoolfuuka-theme-yotsubatwo%2Fyotsuba-b',
+    'domain': 'archive.4plebs.org'
+  });
+
+}else{
+
+  phantom.addCookie({
+    'name': 'foolframe_2q1_theme',
+    'value': 'foolz%2Ffoolfuuka-theme-yotsubatwo%2Fyotsuba',
+    'domain': 'boards.fireden.net'
+  });
+
+  phantom.addCookie({
+    'name': 'foolframe_5SU_theme',
+    'value': 'foolz%2Ffoolfuuka-theme-yotsubatwo%2Fyotsuba',
+    'domain': 'archive.4plebs.org'
+  });
+}
 page.open(url, function() {
     // being the actual size of the headless browser
     page.viewportSize = { width: 768, height: 1024 };
@@ -47,6 +72,7 @@ page.open(url, function() {
     var clipRect = page.evaluate(function(s){
       var e = document.querySelector(s);
       var rect = e.getBoundingClientRect();
+      var _txt = e.querySelector('.text');
       // is this an OP? It is if it has the class 'thread'
       if(e.classList.contains('thread'))
       {
@@ -60,19 +86,37 @@ page.open(url, function() {
             'left' : rect.left,
             'width' : rect.width,
             'height' : _post_bounds.top,
+            'text' : _txt.textContent,
           };
           return r;
         }
         else
         {
           // no adjustment to bounds necessary
-          return rect;
+          var r = {
+            'top' : rect.top,
+            'left' : rect.left,
+            'width' : rect.width,
+            'height' : rect.top,
+            'text' : _txt.textContent,
+          };
+          return r;
+
         }
       }
       else
       {
         var _post_wrapper = e.querySelector('.post_wrapper');
-        return _post_wrapper.getBoundingClientRect();
+        var _rect = _post_wrapper.getBoundingClientRect();
+        // also extract post text
+        var r = {
+            'top' : _rect.top,
+            'left' : _rect.left,
+            'width' : _rect.width,
+            'height' : _rect.height,
+            'text' : _txt.textContent,
+          };
+          return r;
       }
       
       // If this is an OP, find where the posts start
@@ -94,12 +138,13 @@ page.open(url, function() {
     page.render(outfile + '.png');
     
     // extract post text
-    var txt = page.evaluate(function(s){
-      return document.querySelector(s).textContent;
-    },s);
+    //var txt = page.evaluate(function(s){
+    //  return document.querySelector(s).textContent;
+    //},s);
     //console.log('TEXT: ', txt);
 
-
+    var txt = clipRect.text;
+    console.log('TEXT: ', txt);
     if(txt.length > 0)
     {
       var textFilePath = outfile + '.post.txt';
