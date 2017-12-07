@@ -3,41 +3,34 @@ var system = require('system');
 var fs = require('fs');
 
 var args = system.args
-var url = 'http://google.com'
-var s = '#hplogo'
-var outfile = 'post'
 
-if(args.length > 1)
+if(args.length != 3)
 {
-  url = args[1];
+  console.log("USAGE: phantomjs get_post.js <image board page URL> <post number>");
+  phantom.exit(1);
 }
 
+var url = args[1];
+// TODO: test proper formedness for URL
 var chin_regex = new RegExp("boards.4chan.org");
 var is_4chin = chin_regex.test(url);
 
-if(args.length > 2)
-{
-  s = args[2];
+var post_num = args[2];
+var s = '#t' + post_num
 
-  if(is_4chin)
-  {
-    s = '#t' + s;
-  }
-  else
-  {
-    var n = s.substring(0, 1);
-    s = s.substring(1, s.length);
-    s = '#\\3' + n + ' ' + s;
-  }
-}
-if(args.length > 3)
+if(!is_4chin)
 {
-  outfile = args[3]
+  s = post_num;
+  var n = s.substring(0, 1);
+  s = s.substring(1, s.length);
+  s = '#\\3' + n + ' ' + s;
 }
 
+var image_filename = post_num + '.png'
+var text_filename = post_num + '.txt'
 console.log("URL: ", url);
 console.log("Selector: ", s);
-console.log("Outfile: ", outfile);
+console.log("Writing image to file: ", image_filename);
 
 // Set cookies depending upon estimated board archive
 // this is to ensure proper recognizable theme
@@ -146,7 +139,7 @@ page.open(url, function() {
       width:  clipRect.width,
       height: clipRect.height
     };
-    page.render(outfile + '.png');
+    page.render(image_filename);
     
     // extract post text
     //var txt = page.evaluate(function(s){
@@ -158,8 +151,7 @@ page.open(url, function() {
     console.log('TEXT: ', txt);
     if(txt.length > 0)
     {
-      var textFilePath = outfile + '.post.txt';
-      fs.write(textFilePath, txt, 'w');
+      fs.write(text_filename, txt, 'w');
     }
     
     phantom.exit();
