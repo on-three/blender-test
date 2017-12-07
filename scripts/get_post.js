@@ -45,7 +45,36 @@ page.open(url, function() {
     
     // generate a post image
     var clipRect = page.evaluate(function(s){
-      return document.querySelector(s).getBoundingClientRect();
+      var e = document.querySelector(s);
+      var rect = e.getBoundingClientRect();
+      // is this an OP? It is if it has the class 'thread'
+      //if(e.querySeletor('.thread'))
+      if(e.classList.contains('thread'))
+      {
+        // look for an element of class "posts" which is the lower bound of the OP
+        var _posts = e.querySelector('.posts');
+        if(_posts)
+        {
+          var _post_bounds = _posts.getBoundingClientRect();
+          rect.height = rect.height - _post_bounds.top;
+          return rect;
+        }
+        else
+        {
+          // no adjustment to bounds necessary
+          return rect;
+        }
+      }
+      else
+      {
+        // TODO: drill down further to actual post element
+        // TODO: extract post text etc..
+        return rect;
+      }
+      
+      // If this is an OP, find where the posts start
+      // this should be where ,aside class="posts" starts, which may or may not be present
+      // If it's a regular post, no further work is needed.
     },s);
     
     page.clipRect = {
