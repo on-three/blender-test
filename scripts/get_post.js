@@ -48,7 +48,6 @@ page.open(url, function() {
       var e = document.querySelector(s);
       var rect = e.getBoundingClientRect();
       // is this an OP? It is if it has the class 'thread'
-      //if(e.querySeletor('.thread'))
       if(e.classList.contains('thread'))
       {
         // look for an element of class "posts" which is the lower bound of the OP
@@ -56,8 +55,13 @@ page.open(url, function() {
         if(_posts)
         {
           var _post_bounds = _posts.getBoundingClientRect();
-          rect.height = rect.height - _post_bounds.top;
-          return rect;
+          var r = {
+            'top' : rect.top,
+            'left' : rect.left,
+            'width' : rect.width,
+            'height' : _post_bounds.top,
+          };
+          return r;
         }
         else
         {
@@ -76,7 +80,12 @@ page.open(url, function() {
       // this should be where ,aside class="posts" starts, which may or may not be present
       // If it's a regular post, no further work is needed.
     },s);
-    
+   
+    console.log("top: ", clipRect.top);
+    console.log("left: ", clipRect.left);
+    console.log("width: ", clipRect.width);
+    console.log("height: ", clipRect.height);
+
     page.clipRect = {
       top:    clipRect.top,
       left:   clipRect.left,
@@ -89,7 +98,7 @@ page.open(url, function() {
     var txt = page.evaluate(function(s){
       return document.querySelector(s).textContent;
     },s);
-    console.log('TEXT: ', txt);
+    //console.log('TEXT: ', txt);
 
 
     if(txt.length > 0)
