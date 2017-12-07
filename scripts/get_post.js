@@ -33,6 +33,12 @@ console.log("URL: ", url);
 console.log("Selector: ", s);
 console.log("Outfile: ", outfile);
 
+phantom.addCookie({
+  'name': 'foolframe_2q1_theme',
+  'value': 'foolz%2Ffoolfuuka-theme-yotsubatwo%2Fyotsuba-b',
+  'domain': 'boards.fireden.net'
+});
+
 page.open(url, function() {
     // being the actual size of the headless browser
     page.viewportSize = { width: 768, height: 1024 };
