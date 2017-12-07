@@ -11,14 +11,20 @@ if(args.length > 1)
 {
   url = args[1];
 }
+
+var chin_regex = new RegExp("boards.4chan.org");
+var is_4chin = chin_regex.test(url);
+
 if(args.length > 2)
 {
   s = args[2];
-  // escape selectors that start with a number
-  var r = new RegExp("^\#[0-9]{1}");
-  if(r.test(s))
+
+  if(is_4chin)
   {
-    s = s.substring(1, s.length);
+    s = '#t' + s;
+  }
+  else
+  {
     var n = s.substring(0, 1);
     s = s.substring(1, s.length);
     s = '#\\3' + n + ' ' + s;
@@ -73,6 +79,11 @@ page.open(url, function() {
       var e = document.querySelector(s);
       var rect = e.getBoundingClientRect();
       var _txt = e.querySelector('.text');
+      if(!_txt)
+      {
+        // fallback to 4chin style
+        _txt = e.querySelector('.postMessage');;
+      }
       // is this an OP? It is if it has the class 'thread'
       if(e.classList.contains('thread'))
       {
