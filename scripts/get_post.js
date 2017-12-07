@@ -71,9 +71,8 @@ page.open(url, function() {
       }
       else
       {
-        // TODO: drill down further to actual post element
-        // TODO: extract post text etc..
-        return rect;
+        var _post_wrapper = e.querySelector('.post_wrapper');
+        return _post_wrapper.getBoundingClientRect();
       }
       
       // If this is an OP, find where the posts start
