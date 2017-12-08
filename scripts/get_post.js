@@ -4,9 +4,9 @@ var fs = require('fs');
 
 var args = system.args
 
-if(args.length != 3)
+if(args.length < 3)
 {
-  console.log("USAGE: phantomjs get_post.js <image board page URL> <post number>");
+  console.log("USAGE: phantomjs get_post.js <image board page URL> <post number> [optional output directory]");
   phantom.exit(1);
 }
 
@@ -17,6 +17,12 @@ var is_4chin = chin_regex.test(url);
 
 var post_num = args[2];
 var s = '#p' + post_num
+var out_dir = "."
+
+if(args.length >2)
+{
+  out_dir = args[3];
+}
 
 if(!is_4chin)
 {
@@ -161,7 +167,7 @@ page.open(url, function() {
       width:  clipRect.width,
       height: clipRect.height
     };
-    page.render(image_filename);
+    page.render(out_dir + '/' + image_filename);
     
     // extract post text
     //var txt = page.evaluate(function(s){
@@ -173,7 +179,7 @@ page.open(url, function() {
     console.log('TEXT: ', txt);
     if(txt.length > 0)
     {
-      fs.write(text_filename, txt, 'w');
+      fs.write(out_dir + '/' + text_filename, txt, 'w');
     }
     
     phantom.exit();
