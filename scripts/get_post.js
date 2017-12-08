@@ -16,7 +16,7 @@ var chin_regex = new RegExp("boards.4chan.org");
 var is_4chin = chin_regex.test(url);
 
 var post_num = args[2];
-var s = '#t' + post_num
+var s = '#p' + post_num
 
 if(!is_4chin)
 {
@@ -77,19 +77,28 @@ page.open(url, function() {
         // fallback to 4chin style
         _txt = e.querySelector('.postMessage');;
       }
-      // is this an OP? It is if it has the class 'thread'
-      if(e.classList.contains('thread'))
+      // is this an OP? It is if it has the class 'thread'(archives)
+      // or it has clas op, (4chin)
+      if(e.classList.contains('thread') || e.classList.contains('op'))
       {
-        // look for an element of class "posts" which is the lower bound of the OP
-        var _posts = e.querySelector('.posts');
-        if(_posts)
+        //var _posts = e.querySelector('.posts');
+        // the lower bound of the OP is tough to find. The image may extend down
+        // farther than the pXXX element we already have.
+        var img = e.querySelector('.fileThumb');
+        if(img)
         {
-          var _post_bounds = _posts.getBoundingClientRect();
+          var img_bounds = img.getBoundingClientRect();
+          var height = rect.height;
+          if(img_bounds.height > height)
+          {
+            height = img_bounds.height;
+          }
           var r = {
             'top' : rect.top,
             'left' : rect.left,
             'width' : rect.width,
-            'height' : _post_bounds.top,
+            //'height' : _post_bounds.top,
+            'height' : height,
             'text' : _txt.textContent,
           };
           return r;
@@ -105,19 +114,24 @@ page.open(url, function() {
             'text' : _txt.textContent,
           };
           return r;
-
         }
       }
       else
       {
+        // this is not an OP.
+        // 4chin has a class 'reply'. If we have that we can use the
+        // selected element as the bounds
         var _post_wrapper = e.querySelector('.post_wrapper');
-        var _rect = _post_wrapper.getBoundingClientRect();
+        if(!e.classList.contains('reply') && _post_wrapper)
+        {
+          rect = _post_wrapper.getBoundingClientRect();
+        }
         // also extract post text
         var r = {
-            'top' : _rect.top,
-            'left' : _rect.left,
-            'width' : _rect.width,
-            'height' : _rect.height,
+            'top' : rect.top,
+            'left' : rect.left,
+            'width' : rect.width,
+            'height' : rect.height,
             'text' : _txt.textContent,
           };
           return r;
