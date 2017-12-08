@@ -26,7 +26,7 @@ class Line(object):
     self._voice = None
     
     # estimate what our audio and phoneme file are
-    self._audio_file = './audio/{index}.{speaker}.mp3'.format(index=str(self._index), speaker=self._speaker)
+    self._audio_file = './tmp/{index}.{speaker}.mp3'.format(index=str(self._index), speaker=self._speaker)
     self._phoneme_file = self._audio_file + Line.PHONEME_FILE_SUFFIX
 
   @staticmethod
@@ -118,7 +118,7 @@ class Script(object):
     return self._lines[self._current-1]
 
 
-def do_tts(script, out_path='./audio/',
+def do_tts(script, out_path='./tmp/',
             tool='gtts-cli',
             args='{tool} -o {outfile} {text}',
             gen_phonemes=False):
@@ -143,7 +143,7 @@ def do_tts(script, out_path='./audio/',
     if gen_phonemes:
       do_phonemes(outfile)
 
-def do_phonemes(filepath, out_path='./audio/'):
+def do_phonemes(filepath, out_path='./tmp/'):
   """
   Generate phoneme files off input audio files
   ARGS:

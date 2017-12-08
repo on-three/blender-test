@@ -144,7 +144,7 @@ def generate_video():
   for i in range(len(script._lines)):
     print("line: " + str(i) + " end_frame: " + str(end_frame))
     line = script._lines[i]
-    audio_file = './audio/' + str(line._index) + '.' + line._speaker + '.mp3'
+    audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
     if line._audio_file:
       audio_file = line._audio_file
     phoneme_file = audio_file + '.phonemes.out.txt'

@@ -61,7 +61,7 @@ def setup_scene():
   if not scene.sequence_editor:
     scene.sequence_editor_create()
 
-  soundstrip = scene.sequence_editor.sequences.new_sound("1", "audio/1.cia.mp3", 3, 1)
+  soundstrip = scene.sequence_editor.sequences.new_sound("1", "tmp/1.cia.mp3", 3, 1)
   end = soundstrip.frame_final_end #frame_duration
   soundstrip = scene.sequence_editor.sequences.new_sound("2", "audio/2.bane.mp3", 3, end)
   end = soundstrip.frame_final_end #end + soundstrip.frame_duration

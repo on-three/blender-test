@@ -3,6 +3,7 @@
 SCRIPTS_DIR := scripts
 OUT_DIR := out
 AUDIO_DIR := audio
+TMP_DIR := tmp
 
 SCRIPT ?= test.txt
 BLENDER_SCRIPT ?= generate_video
@@ -43,7 +44,7 @@ run: $(TARGET)
 $(TARGET): $(MOV_OUT)
 	$(FFMPEG) -y -i $< $@
 
-$(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py
+$(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(TMP_DIR)
 	mkdir -p $(@D)
 	./scripts/script.py $(SCRIPTS_DIR)/$(SCRIPT) -tts -p
 	$(BLENDER) --background --python $< '$(SCRIPTS_DIR)/$(SCRIPT) --out $@ $(SCRIPT_ARGS)'
@@ -52,6 +53,9 @@ play: $(TARGET)
 
 clean:
 	rm -fr $(OUT_DIR)
+
+$(TMP_DIR):
+	mkdir -p $@
 
 #frommp3: $(MP3)
 #	mkdir -p $(@D)
