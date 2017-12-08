@@ -71,11 +71,11 @@ page.open(url, function() {
     var clipRect = page.evaluate(function(s){
       var e = document.querySelector(s);
       var rect = e.getBoundingClientRect();
-      var _txt = e.querySelector('.text');
+      var _txt = e.querySelector('.postMessage');
       if(!_txt)
       {
         // fallback to 4chin style
-        _txt = e.querySelector('.postMessage');;
+        _txt = e.querySelector('.post_data');
       }
       // is this an OP? It is if it has the class 'thread'(archives)
       // or it has clas op, (4chin)
@@ -85,13 +85,21 @@ page.open(url, function() {
         // the lower bound of the OP is tough to find. The image may extend down
         // farther than the pXXX element we already have.
         var img = e.querySelector('.fileThumb');
+        // fall back to archive format
+        if(!img){
+          img = e.querySelector('.thread_image_box');
+        }
         if(img)
         {
           var img_bounds = img.getBoundingClientRect();
-          var height = rect.height;
-          if(img_bounds.height > height)
+          //var height = rect.height;
+          var _text_rect = _txt.getBoundingClientRect();
+          var text_bottom = _text_rect.top + _text_rect.height;
+          var img_bottom = img_bounds.top + img_bounds.height;
+          var height = text_bottom - rect.top;
+          if(img_bottom > text_bottom)
           {
-            height = img_bounds.height;
+            height = img_bottom - rect.top;
           }
           var r = {
             'top' : rect.top,
