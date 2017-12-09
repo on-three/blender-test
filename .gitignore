@@ -1,4 +1,5 @@
 audio/*
 out
+tmp
 *.swp
 __pycache__
