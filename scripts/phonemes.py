@@ -133,25 +133,27 @@ class Tokenizer(object):
     r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
     #r = re.compile(r'^(?P<phoneme>\W{1,3}) ', re.IGNORECASE)
     print("Opening phoneme file at: " + filename)
-    with open(self._filename) as f:
-      for line in f:
-        #print("*** line: " + line)
-        matches = r.match(line)
-        if matches:
-          p = matches.group('phoneme')
-          s = float(matches.group('start'))
-          e = float(matches.group('end'))
-          # attampt to remove 'noise' by only taking phonemes longer than 0.3 seconds
-          # and if there is a previous phoneme, we extend its time to cover this one
-          print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
-          if (e - s) <= self._min_threshold:
-            if len(self._phonemes) > 0:
-              self._phonemes[-1]._end_frame = int(e*self._fps)
-            continue
-          self._phonemes.append(Phoneme(self._phoneme_map[p],
-            int(s*self._fps) + self._start_frame,
-            int(e*self._fps)+self._start_frame))
-
+    try:
+      with open(self._filename) as f:
+        for line in f:
+          #print("*** line: " + line)
+          matches = r.match(line)
+          if matches:
+            p = matches.group('phoneme')
+            s = float(matches.group('start'))
+            e = float(matches.group('end'))
+            # attampt to remove 'noise' by only taking phonemes longer than 0.3 seconds
+            # and if there is a previous phoneme, we extend its time to cover this one
+            print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
+            if (e - s) <= self._min_threshold:
+              if len(self._phonemes) > 0:
+                self._phonemes[-1]._end_frame = int(e*self._fps)
+              continue
+            self._phonemes.append(Phoneme(self._phoneme_map[p],
+              int(s*self._fps) + self._start_frame,
+              int(e*self._fps)+self._start_frame))
+    except:
+      print("Exctption thrown while parsing phoneme file.")
   def start_frame(self):
     return self._start_frame
 

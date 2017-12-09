@@ -61,8 +61,6 @@ class Line(object):
         # we require a 'THREAD' direction governing the script in general
         # for this to really work, but we still can create the line
         new_line._post = str(direction)
-        new_line._audio_file = direction + '.mp3'
-        new_line._image = direction + '.png'
       elif desc == 'VOICE':
         new_line._voice = direction
 
