@@ -46,13 +46,14 @@ $(TARGET): $(MOV_OUT)
 
 $(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(TMP_DIR)
 	mkdir -p $(@D)
-	./scripts/script.py $(SCRIPTS_DIR)/$(SCRIPT) -tts -p
+	./scripts/script.py $(SCRIPTS_DIR)/$(SCRIPT) --tts --phonemes --posts -o $(TMP_DIR)
 	$(BLENDER) --background --python $< '$(SCRIPTS_DIR)/$(SCRIPT) --out $@ $(SCRIPT_ARGS)'
 	
 play: $(TARGET)
 
 clean:
 	rm -fr $(OUT_DIR)
+	rm -fr $(TMP_DIR)
 
 $(TMP_DIR):
 	mkdir -p $@

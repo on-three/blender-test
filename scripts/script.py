@@ -31,11 +31,11 @@ class Line(object):
 
   def gen_filename(self, path, extension):
     if self._post:
-      return path + self._post + extension
+      return path +'/' + self._post + extension
     elif self._speaker:
-      return str(self._index) + '.' + self._speaker + extension
+      return path + '/' + str(self._index) + '.' + self._speaker + extension
     else:
-      return str(self._index) + extension
+      return path + '/' + str(self._index) + extension
 
   @staticmethod
   def parse(index, line):
@@ -147,28 +147,19 @@ def do_tts(script, out_path='./tmp/',
   """
   print("Generating tts audio files off input script")
   for line in script:
-    outfile = None
+    outfile = line.gen_filename(out_path, '.mp3')
     text = ''
     if line._post:
-      tts_filename = out_path + line._post + '.txt'
-      outfile = out_path + line._post + '.mp3'
-      f = open(tts_filename, 'r')
-      text = f.read()
-      
       # TODO: remove quotes, urls etc from post text
-      
-      s = 'gtts-cli -o {outfile} -f {file}'.format(outfile=outfile, file=tts_filename)
+      infile = line.gen_filename(out_path, '.txt')
+      s = 'gtts-cli -o {outfile} -f {file}'.format(outfile=outfile, file=infile)
       print('Making system call: "%s"' % (s))
       os.system(s)
+      # it's possible that for posts, there might be no text 
       # if we didn't generate a file, fail
-      if not os.path.isfile(outfile):
-        raise IOError("Could not generate file: %s" % (outfile))
-      print('Wrote file %s' % (outfile))
 
     elif line._speaker:
-      outfile = out_path +  str(line._index) + '.' + line._speaker + '.mp3'
       text = pipes.quote(line._text)
-      
       s = args.format(tool=tool, outfile=outfile, text=text)
       print('Making system call: "%s"' % (s))
       os.system(s)
@@ -200,9 +191,15 @@ def get_posts(script, out_path='./tmp/'):
   thread = script._thread
   for line in script:
     if line._post:
+      # as it's expensive to generate post images, first check if it's already there
+      image_filename = line.gen_filename(out_path, '.png')
+      text_filename = line.gen_filename(out_path, '.txt')
+      if(os.path.isfile(image_filename) and os.path.isfile(text_filename)):
+        print("skipping {image} and {txt} because they already exist.".format(image=image_filename, txt=text_filename))
+        continue
       cmd = 'phantomjs scripts/get_post.js \'{thread}\' \'{post}\' {out_path}'.format(thread=thread, post=line._post, out_path=out_path)
       print("Running os.system command: " + cmd)
-      #os.system(cmd)
+      os.system(cmd)
       # TODO: check files now exist or throw
 
 """
