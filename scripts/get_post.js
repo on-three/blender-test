@@ -77,7 +77,7 @@ page.open(url, function() {
     var clipRect = page.evaluate(function(s){
       var e = document.querySelector(s);
       var rect = e.getBoundingClientRect();
-      var _txt = e.querySelector('.postMessage');
+      var _txt = e.querySelector('.text');
       if(!_txt)
       {
         // fallback to 4chin style
