@@ -4,25 +4,55 @@ var fs = require('fs');
 
 var args = system.args
 
-if(args.length < 3)
+if(args.length < 2)
 {
-  console.log("USAGE: phantomjs get_post.js <image board page URL> <post number> [optional output directory]");
+  console.log("USAGE: phantomjs get_post.js <image board post URL> [optional post number] [optional output directory]");
   phantom.exit(1);
 }
 
+
+
 var url = args[1];
-// TODO: test proper formedness for URL
+var post_num = 0;
+var out_dir = "."
+
+// first arg has to be a basic URL, with our without a post selector at the end (#xxx)
+// Archive single post URL signature
+//https://archive.4plebs.org/tv/thread/91299237/#91299237
+// 4chin aingle post URL signature
+//http://boards.4chan.org/tv/thread/91305580#p91305580
+var postNumRegex = new RegExp("(.+)(/#|#p)([0-9]+)$")
+
+var post_num_match = url.match(postNumRegex)
+if(post_num_match)
+{
+  post_num = post_num_match[3];
+  url = post_num_match[1];
+
+  if(args.length > 2)
+  {
+    out_dir = args[2]
+  }
+}else{
+  // if no post number in the URL then it has to be provided
+  // as an additional command line parameter
+  if(args.length < 3)
+  {
+    console.log("Please provide a post number in some way, either through URL or via a 2nd parameter")
+    phantom.exit(1);
+  }
+  post_num = args[2]
+  if(args.length > 3)
+  {
+    out_dir = args[3]
+  }
+}
+
 var chin_regex = new RegExp("boards.4chan.org");
 var is_4chin = chin_regex.test(url);
 
-var post_num = args[2];
+//var post_num = args[2];
 var s = '#p' + post_num
-var out_dir = "."
-
-if(args.length >2)
-{
-  out_dir = args[3];
-}
 
 if(!is_4chin)
 {
@@ -82,6 +112,10 @@ page.open(url, function() {
       {
         // fallback to 4chin style
         _txt = e.querySelector('.post_data');
+      }
+      if(!_txt)
+      {
+        _txt = e.querySelector('.postMessage');
       }
       // is this an OP? It is if it has the class 'thread'(archives)
       // or it has clas op, (4chin)
