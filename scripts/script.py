@@ -25,10 +25,6 @@ class Line(object):
     self._image = None
     self._voice = None
     
-    # estimate what our audio and phoneme file are
-    self._audio_file = './tmp/{index}.{speaker}.mp3'.format(index=str(self._index), speaker=self._speaker)
-    self._phoneme_file = self._audio_file + Line.PHONEME_FILE_SUFFIX
-
   def gen_filename(self, path, extension):
     if self._post:
       return path +'/' + self._post + extension
@@ -83,6 +79,13 @@ class Line(object):
       
     # see if the line text has any parenthetical directions embedded        
     if valid_line:
+      # estimate what our audio file and phoneme files will be
+      if not new_line._audio_file:
+        new_line._audio_file = new_line.gen_filename('./tmp', '.mp3')
+      if not new_line._phoneme_file:
+        new_line._phoneme_file = new_line.gen_filename('./tmp', '.mp3.phonemes.out.txt')
+
+
       return new_line
     return None
          
@@ -147,7 +150,12 @@ def do_tts(script, out_path='./tmp/',
   """
   print("Generating tts audio files off input script")
   for line in script:
-    outfile = line.gen_filename(out_path, '.mp3')
+    outfile = line._audio_file or line.gen_filename(out_path, '.mp3')
+    
+    # the audio file for this line might already exist
+    if os.path.isfile(outfile):
+      print("Audio file {file} already exists. Not generating.".format(file=line._audio_file))
+      continue
     text = ''
     if line._post:
       # TODO: remove quotes, urls etc from post text
