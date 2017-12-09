@@ -184,7 +184,7 @@ def do_phonemes(script, out_path='./tmp/'):
     out_path: output directory for generated phoeneme file.
   """
   for line in script:
-    filepath = line.gen_filename(out_path, '.mp3') 
+    filepath = line._audio_file or line.gen_filename(out_path, '.mp3') 
     cmd = 'scripts/phonemes.sh {filepath}'.format(filepath=filepath)
     print("Generating phonemes file for input audio file " + filepath)
     os.system(cmd)
