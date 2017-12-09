@@ -15,9 +15,9 @@ class Line(object):
   # infer phoneme files via filename
   PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
 
-  def __init__(self, speaker, text, index=0):
-    self._speaker = speaker
-    self._text = text
+  def __init__(self, index=0):
+    self._speaker = None
+    self._text = None
     self._index = index
     self._audio_file = None
     self._phoneme_file = None
@@ -34,40 +34,48 @@ class Line(object):
     # parse indivdual lines of dialog for speaker and text
     r = re.compile(r'^(?P<speaker>[^\s:]+):( )?(?P<text>.+)')
     # parse any string for "stage directions"
-    pd = re.compile(r'\((?P<desc>[^\s():]+):(?P<direction>[^()]+)\)')
-    
+    pd = re.compile(r'\((?P<desc>[^\s():]+):(?P<direction>[^()]+)?\)')
+
+    new_line = Line(index=index)
+    valid_line = False
+
+    # remove "stage directions" before processing the line properly
+    for d in pd.finditer(line):
+      valid_line = True
+      desc = d.group('desc')
+      direction = None
+      if 'direction' in d.groupdict():
+        direction = d.group('direction').strip()
+      print("Direction: {desc} --> {direction}".format(desc=desc, direction=direction))
+
+      if desc == 'AUDIO':
+        # an audio file contains the lines spoken at this point
+        new_line._audio_file = str(direction)
+        new_line._phoneme_file = new_line._audio_file + Line.PHONEME_FILE_SUFFIX
+      elif desc == 'POST':
+        # a 4chin or archive post contains the lines spoken at this point
+        # we require a 'THREAD' direction governing the script in general
+        # for this to really work, but we still can create the line
+        new_line._post = str(direction)
+        new_line._audio_file = direction + '.mp3'
+        new_line._image = direction + '.png'
+      elif desc == 'VOICE':
+        new_line._voice = direction
+
+    line = re.sub('\([^\s():]+[^()]+\)', '', line)
+
     matches = r.match(line)
     if matches:
+      valid_line = True
       speaker = matches.group('speaker')
       text = matches.group('text')
       print("SPEAKER: " + speaker + ' TEXT: ' + text)
-
-      new_line = Line(speaker, text, index=index)
+      new_line._speaker = speaker
+      new_line._text = text
       
-      # see if the line text has any parenthetical directions embedded
-      for d in pd.finditer(text):
-        desc = d.group('desc')
-        direction = None
-        if 'direction' in d.groupdict():
-          direction = d.group('direction').strip()
-        print("Direction: {desc} --> {direction}".format(desc=desc, direction=direction))
-
-        if desc == 'AUDIO':
-          # an audio file contains the lines spoken at this point
-          new_line._audio_file = str(direction)
-          new_line._phoneme_file = new_line._audio_file + Line.PHONEME_FILE_SUFFIX
-        elif desc == 'POST':
-          # a 4chin or archive post contains the lines spoken at this point
-          # we require a 'THREAD' direction governing the script in general
-          # for this to really work, but we still can create the line
-          new_line._post = str(direction)
-          new_line._audio_file = direction + '.mp3'
-          new_line._image = direction + '.png'
-        elif desc == 'VOICE':
-          new_line._voice = direction
-      
+    # see if the line text has any parenthetical directions embedded        
+    if valid_line:
       return new_line
-
     return None
          
 
@@ -78,7 +86,7 @@ class Script(object):
     self._thread = None
 
     # parse any string for "stage directions"
-    pd = re.compile(r'^\((?P<desc>[^\s():]+):(?P<direction>[^()]+)\)')
+    pd = re.compile(r'^\((?P<desc>[^\s():]+):(?P<direction>[^()]+)?\)')
 
     with open(self._filepath) as f:
       i = 1 # don't enumerate so we can increment by SPEAKER
@@ -131,17 +139,35 @@ def do_tts(script, out_path='./tmp/',
   """
   print("Generating tts audio files off input script")
   for line in script:
-    outfile = out_path + str(line._index) + '.' + line._speaker + '.mp3'
-    l = pipes.quote(line._text)
-    s = args.format(tool=tool, outfile=outfile, text=l)
-    print('Making system call: "%s"' % (s))
-    os.system(s)
-    # if we didn't generate a file, fail
-    if not os.path.isfile(outfile):
-      raise IOError("Could not generate file: %s" % (outfile))
-    print('Wrote file %s' % (outfile))
-    if gen_phonemes:
-      do_phonemes(outfile)
+    outfile = None
+    text = ''
+    if line._post:
+      tts_filename = out_path + line._post + '.txt'
+      outfile = out_path + line._post + '.mp3'
+      f = open(tts_filename, 'r')
+      text = f.read()
+      
+      # TODO: remove quotes, urls etc from post text
+      
+      s = 'gtts-cli -o {outfile} -f {file}'.format(outfile=outfile, file=tts_filename)
+      print('Making system call: "%s"' % (s))
+      os.system(s)
+      # if we didn't generate a file, fail
+      if not os.path.isfile(outfile):
+        raise IOError("Could not generate file: %s" % (outfile))
+      print('Wrote file %s' % (outfile))
+
+    elif line._speaker:
+      outfile = out_path +  str(line._index) + '.' + line._speaker + '.mp3'
+      text = pipes.quote(line._text)
+      
+      s = args.format(tool=tool, outfile=outfile, text=text)
+      print('Making system call: "%s"' % (s))
+      os.system(s)
+      # if we didn't generate a file, fail
+      if not os.path.isfile(outfile):
+        raise IOError("Could not generate file: %s" % (outfile))
+      print('Wrote file %s' % (outfile))
 
 def do_phonemes(filepath, out_path='./tmp/'):
   """
@@ -166,7 +192,7 @@ def get_posts(script, out_path='./tmp/'):
     if line._post:
       cmd = 'phantomjs scripts/get_post.js \'{thread}\' \'{post}\' {out_path}'.format(thread=thread, post=line._post, out_path=out_path)
       print("Running os.system command: " + cmd)
-      os.system(cmd)
+      #os.system(cmd)
       # TODO: check files now exist or throw
 
 """
@@ -178,7 +204,7 @@ def get_posts(script, out_path='./tmp/'):
 def main():
   parser = argparse.ArgumentParser(description='Parse simple animation script.')
   parser.add_argument('infile', action="store")
-  parser.add_argument('-tts', action="store_true", default=False)
+  parser.add_argument('--tts', action="store_true", default=False)
   parser.add_argument('-p', action="store_true", default=False)
   parser.add_argument('-o', '--outdir', type=str, default='./tmp/')
   parser.add_argument('--posts', action="store_true", default=False, help="create snapshots of post numbers in script.")
@@ -193,11 +219,12 @@ def main():
   for line in script:
     print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
 
+  if args.posts:
+    get_posts(script, out_path=args.outdir)
+
   if args.tts:
     do_tts(script, out_path=args.outdir, gen_phonemes=args.p)
 
-  if args.posts:
-    get_posts(script, out_path=args.outdir)
 
 if __name__ == '__main__':
   main()
