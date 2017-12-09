@@ -29,6 +29,14 @@ class Line(object):
     self._audio_file = './tmp/{index}.{speaker}.mp3'.format(index=str(self._index), speaker=self._speaker)
     self._phoneme_file = self._audio_file + Line.PHONEME_FILE_SUFFIX
 
+  def gen_filename(self, path, extension):
+    if self._post:
+      return path + self._post + extension
+    elif self._speaker:
+      return str(self._index) + '.' + self._speaker + extension
+    else:
+      return str(self._index) + extension
+
   @staticmethod
   def parse(index, line):
     # parse indivdual lines of dialog for speaker and text
@@ -169,16 +177,18 @@ def do_tts(script, out_path='./tmp/',
         raise IOError("Could not generate file: %s" % (outfile))
       print('Wrote file %s' % (outfile))
 
-def do_phonemes(filepath, out_path='./tmp/'):
+def do_phonemes(script, out_path='./tmp/'):
   """
   Generate phoneme files off input audio files
   ARGS:
     filepath: path to input audio file
     out_path: output directory for generated phoeneme file.
   """
-  cmd = 'scripts/phonemes.sh {filepath}'.format(filepath=filepath)
-  print("Generating phonemes file for input audio file " + filepath)
-  os.system(cmd)
+  for line in script:
+    filepath = line.gen_filename(out_path, '.mp3') 
+    cmd = 'scripts/phonemes.sh {filepath}'.format(filepath=filepath)
+    print("Generating phonemes file for input audio file " + filepath)
+    os.system(cmd)
 
 
 def get_posts(script, out_path='./tmp/'):
@@ -205,7 +215,7 @@ def main():
   parser = argparse.ArgumentParser(description='Parse simple animation script.')
   parser.add_argument('infile', action="store")
   parser.add_argument('--tts', action="store_true", default=False)
-  parser.add_argument('-p', action="store_true", default=False)
+  parser.add_argument('--phonemes', action="store_true", default=False)
   parser.add_argument('-o', '--outdir', type=str, default='./tmp/')
   parser.add_argument('--posts', action="store_true", default=False, help="create snapshots of post numbers in script.")
   args = parser.parse_args()
@@ -223,8 +233,10 @@ def main():
     get_posts(script, out_path=args.outdir)
 
   if args.tts:
-    do_tts(script, out_path=args.outdir, gen_phonemes=args.p)
+    do_tts(script, out_path=args.outdir)
 
+  if args.phonemes:
+    do_phonemes(script, out_path=args.outdir)
 
 if __name__ == '__main__':
   main()
