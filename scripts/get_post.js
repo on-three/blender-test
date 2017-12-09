@@ -113,7 +113,7 @@ page.open(url, function() {
             'width' : rect.width,
             //'height' : _post_bounds.top,
             'height' : height,
-            'text' : _txt.textContent,
+            'text' : _txt.innerText,
           };
           return r;
         }
@@ -125,7 +125,7 @@ page.open(url, function() {
             'left' : rect.left,
             'width' : rect.width,
             'height' : rect.top,
-            'text' : _txt.textContent,
+            'text' : _txt.innerText,
           };
           return r;
         }
@@ -146,7 +146,7 @@ page.open(url, function() {
             'left' : rect.left,
             'width' : rect.width,
             'height' : rect.height,
-            'text' : _txt.textContent,
+            'text' : _txt.innerText,
           };
           return r;
       }
