@@ -120,6 +120,7 @@ page.open(url, function() {
     
     // generate a post image
     var clipRect = page.evaluate(function(s){
+      var _op_padding = 10;
       var e = document.querySelector(s);
       var rect = e.getBoundingClientRect();
       var _txt = e.querySelector('.text');
@@ -132,6 +133,13 @@ page.open(url, function() {
       {
         _txt = e.querySelector('.postMessage');
       }
+
+      // get post subject as well if it has one
+      var _subject = e.querySelector('.subject');
+      if(_subject) {
+        _subject.style.overflow = "visible";
+      }
+
       // is this an OP? It is if it has the class 'thread'(archives)
       // or it has clas op, (4chin)
       if(e.classList.contains('thread') || e.classList.contains('op'))
@@ -154,7 +162,7 @@ page.open(url, function() {
           var height = text_bottom - rect.top;
           if(img_bottom > text_bottom)
           {
-            height = img_bottom - rect.top;
+            height = img_bottom - rect.top + _op_padding;
           }
           var r = {
             'top' : rect.top,
@@ -163,6 +171,7 @@ page.open(url, function() {
             //'height' : _post_bounds.top,
             'height' : height,
             'text' : _txt.innerText,
+            'subject' : _subject.innerText,
           };
           return r;
         }
@@ -175,6 +184,7 @@ page.open(url, function() {
             'width' : rect.width,
             'height' : rect.top,
             'text' : _txt.innerText,
+            'subject' : _subject.innerText,
           };
           return r;
         }
@@ -196,6 +206,7 @@ page.open(url, function() {
             'width' : rect.width,
             'height' : rect.height,
             'text' : _txt.innerText,
+            'subject' : _subject.innerText,
           };
           return r;
       }
@@ -218,7 +229,12 @@ page.open(url, function() {
     };
     page.render(out_dir + '/' + image_filename);
     
-    var txt = clipRect.text;
+    var txt = '';
+    if(clipRect.subject && clipRect.subject.length > 0) {
+    //  txt = clipRect.subject + '\n'
+      console.log("found subject: " + clipRect.subject);
+    }
+    txt = txt + clipRect.text
     txt = filter_post(txt);
     console.log('TEXT: ', txt);
     if(txt.length > 0)
