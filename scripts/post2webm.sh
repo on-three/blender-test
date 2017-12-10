@@ -1,9 +1,14 @@
 #!/bin/bash
 
 
-if [ "$#" -ne 1 ]; then
-	echo "USAGE: $0  <url to 4chin post>"
+if [ "$#" -lt 1 ]; then
+	echo "USAGE: $0  <url to 4chin post> [-u: upload to mixtape.moe]"
 	exit -1
+fi
+
+UPLOAD=false
+if [ "$#" -gt 1 ]; then
+UPLOAD=true
 fi
 
 #POST_URL=http://boards.4chan.org/tv/thread/91304338#p91304338
@@ -56,4 +61,10 @@ echo Generating video from image $POST_IMG
 ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
 
 # TODO generate directly to webm
-ffmpeg -i $POST_VIDEO $POST_WEBM
+ffmpeg -y -i $POST_VIDEO $POST_WEBM
+
+if $UPLOAD ; then
+  # upload to mixtape.moe
+  WEBM_URL=`uploadtomixtape.sh ${POST_WEBM}`
+  echo $WEBM_URL
+fi

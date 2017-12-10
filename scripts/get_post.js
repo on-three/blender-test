@@ -10,8 +10,6 @@ if(args.length < 2)
   phantom.exit(1);
 }
 
-
-
 var url = args[1];
 var post_num = 0;
 var out_dir = "."
