@@ -10,6 +10,23 @@ if(args.length < 2)
   phantom.exit(1);
 }
 
+
+var filter_post = function(str) {
+  // remove all (YOU)s
+  str = str.replace(/>>[0-9]+/g,'');
+  // remove all greentext
+  str = str.replace(/>/g,' ');
+  // remove all hyperlinks and youtbes
+  str = str.replace(/https?:\/\/[^s]+/g,'')
+
+  //expand some common abbreviations so they're better for tts
+  str = str.replace(/ tfw /g, ' the feel when ');
+  str = str.replace(/ mfw /g, ' my face when ');
+
+  
+  return str;
+}
+
 var url = args[1];
 var post_num = 0;
 var out_dir = "."
@@ -201,13 +218,8 @@ page.open(url, function() {
     };
     page.render(out_dir + '/' + image_filename);
     
-    // extract post text
-    //var txt = page.evaluate(function(s){
-    //  return document.querySelector(s).textContent;
-    //},s);
-    //console.log('TEXT: ', txt);
-
     var txt = clipRect.text;
+    txt = filter_post(txt);
     console.log('TEXT: ', txt);
     if(txt.length > 0)
     {
