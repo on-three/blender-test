@@ -183,7 +183,7 @@ def do_phonemes(script, out_path='./tmp/'):
   """
   for line in script:
     filepath = line._audio_file or line.gen_filename(out_path, '.mp3') 
-    cmd = 'scripts/phonemes.sh {filepath}'.format(filepath=filepath)
+    cmd = 'tools/phonemes.sh {filepath}'.format(filepath=filepath)
     print("Generating phonemes file for input audio file " + filepath)
     os.system(cmd)
 
@@ -203,7 +203,7 @@ def get_posts(script, out_path='./tmp/'):
       if(os.path.isfile(image_filename) and os.path.isfile(text_filename)):
         print("skipping {image} and {txt} because they already exist.".format(image=image_filename, txt=text_filename))
         continue
-      cmd = 'phantomjs scripts/get_post.js \'{thread}\' \'{post}\' {out_path}'.format(thread=thread, post=line._post, out_path=out_path)
+      cmd = 'phantomjs tools/get_post.js \'{thread}\' \'{post}\' {out_path}'.format(thread=thread, post=line._post, out_path=out_path)
       print("Running os.system command: " + cmd)
       os.system(cmd)
       # TODO: check files now exist or throw

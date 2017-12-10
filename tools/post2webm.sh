@@ -37,7 +37,7 @@ POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
 POST_WEBM=${POST_NUM}.webm
 
 # generate an image and textfile off the post
-phantomjs scripts/get_post.js "$POST_URL" "$WORKING_DIR"
+phantomjs tools/get_post.js "$POST_URL" "$WORKING_DIR"
 
 # fail if we don't have the resultant .png and .txt files
 if [ ! -f $POST_IMG ]; then
