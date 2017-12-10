@@ -1,12 +1,14 @@
 
 
 SCRIPTS_DIR := scripts
+TOOL_DIR := tools
+PYTHON_DIR := python
 OUT_DIR := out
 AUDIO_DIR := audio
 TMP_DIR := tmp
 
 SCRIPT ?= test.txt
-BLENDER_SCRIPT ?= generate_video
+BLENDER_SCRIPT ?= $(PYTHON_DIR)/generate_video.py
 TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
 MOV_OUT ?= $(TARGET:$(TARGET_EXT)=.mov)
@@ -44,9 +46,9 @@ run: $(TARGET)
 $(TARGET): $(MOV_OUT)
 	$(FFMPEG) -y -i $< $@
 
-$(MOV_OUT): $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(TMP_DIR)
+$(MOV_OUT): $(BLENDER_SCRIPT) $(TMP_DIR)
 	mkdir -p $(@D)
-	./scripts/script.py $(SCRIPTS_DIR)/$(SCRIPT) --tts --phonemes --posts -o $(TMP_DIR)
+	./$(PYTHON_DIR)/script.py $(SCRIPTS_DIR)/$(SCRIPT) --tts --phonemes --posts -o $(TMP_DIR)
 	$(BLENDER) --background --python $< '$(SCRIPTS_DIR)/$(SCRIPT) --out $@ $(SCRIPT_ARGS)'
 	
 play: $(TARGET)
