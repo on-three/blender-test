@@ -59,9 +59,9 @@ var text_filepath = out_dir + '/' + thread_num + '.txt'
 var chin_regex = new RegExp("boards.4chan.org");
 var is_4chin = chin_regex.test(url);
 
-console.log("URL: ", url);
-console.log("Output dir: ", out_dir);
-console.log("Thread num:", thread_num);
+//console.log("URL: ", url);
+//console.log("Output dir: ", out_dir);
+//console.log("Thread num:", thread_num);
 // TODO: remove this selector
 var s = "";
 
@@ -88,14 +88,18 @@ page.open(url, function() {
       
     },s);
 
-    console.log("posts: ", post_list);
+    //console.log("posts: ", post_list);
 
     //post_list = ["a", "b", "c"];
     //console.log("posts: ", post_list);
     var _txt = post_list.join('\n');
-    console.log(_txt);
-    fs.write(out_dir + '/' + text_filepath, _txt, 'w');
+    //console.log(_txt);
+    fs.write(text_filepath, _txt, 'w');
     
     phantom.exit();
 });
+
+console.log(text_filepath);
+
+//phantom.exit(0);
 
