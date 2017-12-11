@@ -53,7 +53,8 @@ if(args.length > 2)
 thread_num = url.match(/([0-9]+)\/?$/, '')[1];
 
 // the path to the textfile we'll write (a simple list of post numbers)
-var text_filepath = 'post_numbers.txt'
+//var text_filepath = 'post_numbers.txt'
+var text_filepath = out_dir + '/' + thread_num + '.txt'
 
 var chin_regex = new RegExp("boards.4chan.org");
 var is_4chin = chin_regex.test(url);
