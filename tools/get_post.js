@@ -19,6 +19,9 @@ var filter_post = function(str) {
   // remove all hyperlinks and youtbes
   str = str.replace(/https?:\/\/[^s]+/g,'')
 
+  // remove (OP) markers
+  str = str.replace(/\(OP\)/g,'');
+
   //expand some common abbreviations so they're better for tts
   str = str.replace(/ tfw /g, ' the feel when ');
   str = str.replace(/ mfw /g, ' my face when ');
