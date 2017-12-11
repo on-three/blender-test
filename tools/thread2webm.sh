@@ -68,8 +68,9 @@ for POST_NUM in $(cat < ${POST_LIST}); do
 
   echo Generating video from image $POST_IMG
 
-  
-  ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
+  #-video_track_timescale 29971 -ac 1
+  #ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
+  ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -video_track_timescale 29971 -ac 1 -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
   
   # append created file to our list
   echo Added video $POST_VIDEO to $VIDEO_LIST
@@ -79,9 +80,11 @@ for POST_NUM in $(cat < ${POST_LIST}); do
 done
 
 
-ffmpeg -f concat -safe 0 -i $VIDEOS_LIST -c copy ${THREAD_WEBM}.mp4
+#ffmpeg -f concat -safe 0 -i $VIDEOS_LIST -c copy ${THREAD_WEBM}.mp4
+ffmpeg -f concat -safe 0 -i $VIDEOS_LIST -c copy test.mp4
 
-ffmpeg -i ${THREAD_WEBM}.mp4 ${THREAD_WEBM}
+
+ffmpeg -i test.mp4 ${THREAD_WEBM}
 
 if $UPLOAD ; then
   # upload to mixtape.moe
