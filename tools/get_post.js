@@ -135,10 +135,11 @@ page.open(url, function() {
       }
 
       // get post subject as well if it has one
-      var _subject = e.querySelector('.subject');
-      if(_subject) {
-        _subject.style.overflow = "visible";
-      }
+      //var _subject = e.querySelector('.subject');
+      var _subject = "None";
+      //if(_subject) {
+      //  _subject.style.overflow = "visible";
+      //}
 
       // is this an OP? It is if it has the class 'thread'(archives)
       // or it has clas op, (4chin)
