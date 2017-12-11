@@ -50,7 +50,7 @@ if(args.length > 2)
   out_dir = args[2]
 }
 
-thread_num = url.match(/([0-9]+\/?$)/, '')[0];
+thread_num = url.match(/([0-9]+)\/?$/, '')[1];
 
 // the path to the textfile we'll write (a simple list of post numbers)
 var text_filepath = 'post_numbers.txt'
