@@ -29,8 +29,8 @@ var filter_post = function(str) {
 }
 
 var url = args[1];
-var post_num = 0;
-var out_dir = "."
+var thread_num = 0;
+var out_dir = ".";
 
 // first arg has to be a basic URL, with our without a post selector at the end (#xxx)
 // Archive single post URL signature
@@ -50,6 +50,8 @@ if(args.length > 2)
   out_dir = args[2]
 }
 
+thread_num = url.match(/([0-9]+\/?$)/, '')[0];
+
 // the path to the textfile we'll write (a simple list of post numbers)
 var text_filepath = 'post_numbers.txt'
 
@@ -58,7 +60,7 @@ var is_4chin = chin_regex.test(url);
 
 console.log("URL: ", url);
 console.log("Output dir: ", out_dir);
-
+console.log("Thread num:", thread_num);
 // TODO: remove this selector
 var s = "";
 
