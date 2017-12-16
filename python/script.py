@@ -24,6 +24,7 @@ class Line(object):
     self._post = None
     self._image = None
     self._voice = None
+    self._video = None
     
   def gen_filename(self, path, extension):
     if self._post:
@@ -63,6 +64,8 @@ class Line(object):
         new_line._post = str(direction)
       elif desc == 'VOICE':
         new_line._voice = direction
+      elif desc == 'VIDEO':
+        new_line._video = direction
 
     line = re.sub('\([^\s():]+[^()]+\)', '', line)
 
