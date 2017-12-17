@@ -1,17 +1,18 @@
 
-
 SCRIPTS_DIR := scripts
 TOOL_DIR := tools
 PYTHON_DIR := python
 OUT_DIR := out
 AUDIO_DIR := audio
-TMP_DIR := tmp
 
-SCRIPT ?= test.txt
+SCRIPT ?= test
+SCRIPT_FILE ?=  $(SCRIPTS_DIR)/$(SCRIPT).txt
 BLENDER_SCRIPT ?= $(PYTHON_DIR)/generate_video.py
 TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
 MOV_OUT ?= $(TARGET:$(TARGET_EXT)=.mov)
+
+TMP_DIR := tmp/$(SCRIPT)
 
 # some additional args that are passed to blender via
 # the SCRIPT_ARGS variable
@@ -48,8 +49,8 @@ $(TARGET): $(MOV_OUT)
 
 $(MOV_OUT): $(BLENDER_SCRIPT) $(TMP_DIR)
 	mkdir -p $(@D)
-	./$(PYTHON_DIR)/script.py $(SCRIPTS_DIR)/$(SCRIPT) --tts --phonemes --posts --videos -o $(TMP_DIR)
-	$(BLENDER) --background --python $< '$(SCRIPTS_DIR)/$(SCRIPT) --out $@ $(SCRIPT_ARGS)'
+	./$(PYTHON_DIR)/script.py $(SCRIPT_FILE) --tts --phonemes --posts --videos -o $(TMP_DIR)
+	$(BLENDER) --background --python $< '$(SCRIPT_FILE) --assetdir $(TMP_DIR) --out $@ $(SCRIPT_ARGS)'
 	
 play: $(TARGET)
 

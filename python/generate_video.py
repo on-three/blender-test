@@ -111,6 +111,7 @@ def generate_video():
   parser = argparse.ArgumentParser(description='Generate video from input script.')
   parser.add_argument('infile', help='Input script txt file.')
   parser.add_argument('-o', '--out', help='Output file path')
+  parser.add_argument('-a', '--assetdir', help='Generated asset resource dir')
   parser.add_argument('-t', '--test', action='store_true', default=False, help='Test run only generating single output image')
   parser.add_argument('-n', '--norender', action='store_true', default=False, help='Turn off all rendering.')
   parser.add_argument('-s', '--save', help='Save a blend file of configuration.')
@@ -149,7 +150,7 @@ def generate_video():
   
   # load a script passed as argument
   print("opening file: " + script_filepath)
-  script = Script(script_filepath)
+  script = Script(script_filepath, asset_dir=args.assetdir)
 
   # add audio for all lines in script
   #for line in script:

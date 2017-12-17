@@ -39,7 +39,7 @@ class Line(object):
       return path + '/' + str(self._index) + extension
 
   @staticmethod
-  def parse(index, line):
+  def parse(index, line, tmp_dir='./tmp'):
     # parse indivdual lines of dialog for speaker and text
     r = re.compile(r'^(?P<speaker>[^\s:]+):( )?(?P<text>.+)')
     # parse any string for "stage directions"
@@ -86,9 +86,9 @@ class Line(object):
     if valid_line:
       # estimate what our audio file and phoneme files will be
       if not new_line._audio_file:
-        new_line._audio_file = new_line.gen_filename('./tmp', '.mp3')
+        new_line._audio_file = new_line.gen_filename(tmp_dir, '.mp3')
       if not new_line._phoneme_file:
-        new_line._phoneme_file = new_line.gen_filename('./tmp', '.mp3.phonemes.out.txt')
+        new_line._phoneme_file = new_line.gen_filename(tmp_dir, '.mp3.phonemes.out.txt')
 
 
       return new_line
@@ -96,7 +96,7 @@ class Line(object):
          
 
 class Script(object):
-  def __init__(self, filepath):
+  def __init__(self, filepath, asset_dir='./tmp'):
     self._filepath = filepath
     self._lines = []
     self._thread = None
@@ -124,7 +124,7 @@ class Script(object):
         
           continue
 
-        l = Line.parse(i, line)
+        l = Line.parse(i, line, asset_dir)
         if l:
           self._lines.append(l)
           i = i + 1
@@ -142,7 +142,7 @@ class Script(object):
     return self._lines[self._current-1]
 
 
-def do_tts(script, out_path='./tmp/',
+def do_tts(script, out_dir='./tmp/',
             tool='gtts-cli',
             args='{tool} -o {outfile} {text}',
             gen_phonemes=False):
@@ -155,7 +155,7 @@ def do_tts(script, out_path='./tmp/',
   """
   print("Generating tts audio files off input script")
   for line in script:
-    outfile = line._audio_file or line.gen_filename(out_path, '.mp3')
+    outfile = line._audio_file or line.gen_filename(out_dir, '.mp3')
     
     # the audio file for this line might already exist
     if os.path.isfile(outfile):
@@ -164,7 +164,7 @@ def do_tts(script, out_path='./tmp/',
     text = ''
     if line._post:
       # TODO: remove quotes, urls etc from post text
-      infile = line.gen_filename(out_path, '.txt')
+      infile = line.gen_filename(out_dir, '.txt')
       s = 'gtts-cli -o {outfile} -f {file}'.format(outfile=outfile, file=infile)
       print('Making system call: "%s"' % (s))
       os.system(s)
@@ -181,7 +181,7 @@ def do_tts(script, out_path='./tmp/',
         raise IOError("Could not generate file: %s" % (outfile))
       print('Wrote file %s' % (outfile))
 
-def do_phonemes(script, out_path='./tmp/'):
+def do_phonemes(script, out_dir='./tmp/'):
   """
   Generate phoneme files off input audio files
   ARGS:
@@ -189,13 +189,13 @@ def do_phonemes(script, out_path='./tmp/'):
     out_path: output directory for generated phoeneme file.
   """
   for line in script:
-    filepath = line._audio_file or line.gen_filename(out_path, '.mp3') 
+    filepath = line._audio_file or line.gen_filename(out_dir, '.mp3') 
     cmd = 'tools/phonemes.sh {filepath}'.format(filepath=filepath)
     print("Generating phonemes file for input audio file " + filepath)
     os.system(cmd)
 
 
-def get_posts(script, out_path='./tmp/'):
+def get_posts(script, out_dir='./tmp/'):
   # script has to specify a THREAD to do anything
   if not script._thread:
     print("Script did not specify a THREAD for post sources.")
@@ -205,17 +205,17 @@ def get_posts(script, out_path='./tmp/'):
   for line in script:
     if line._post:
       # as it's expensive to generate post images, first check if it's already there
-      image_filename = line.gen_filename(out_path, '.png')
-      text_filename = line.gen_filename(out_path, '.txt')
+      image_filename = line.gen_filename(out_dir, '.png')
+      text_filename = line.gen_filename(out_dir, '.txt')
       if(os.path.isfile(image_filename) and os.path.isfile(text_filename)):
         print("skipping {image} and {txt} because they already exist.".format(image=image_filename, txt=text_filename))
         continue
-      cmd = 'phantomjs tools/get_post.js \'{thread}\' \'{post}\' {out_path}'.format(thread=thread, post=line._post, out_path=out_path)
+      cmd = 'phantomjs tools/get_post.js \'{thread}\' \'{post}\' {out_dir}'.format(thread=thread, post=line._post, out_dir=out_dir)
       print("Running os.system command: " + cmd)
       os.system(cmd)
       # TODO: check files now exist or throw
 
-def get_video_info(script, out_path='./tmp/'):
+def get_video_info(script, out_dir='./tmp/'):
   """
   Generate video (and audio) info files off input video files
   ARGS:
@@ -226,7 +226,7 @@ def get_video_info(script, out_path='./tmp/'):
     filename = line._video or line._audio_file
     if filename:
       print("**** " + filename)
-      outfile = line.gen_filename(out_path, '.runtime.txt')
+      outfile = line.gen_filename(out_dir, '.runtime.txt')
       cmd = 'ffprobe -i "{filename}" -show_entries format=duration -v quiet -of csv="p=0" > {outfile}'.format(filename=filename, outfile=outfile)
       print("Generating video length file for input media file " + filename)
       print(cmd)
@@ -248,27 +248,29 @@ def main():
   parser.add_argument('-o', '--outdir', type=str, default='./tmp/')
   parser.add_argument('--posts', action="store_true", default=False, help="create snapshots of post numbers in script.")
   args = parser.parse_args()
-  
+
+  print("Generating supporting assets in dir: {dir}".format(dir=args.outdir))
+
   infile = args.infile
   if not os.path.isfile(infile):
     print("File: " + infile + " not found.")
     return -1
 
-  script = Script(infile)
+  script = Script(infile, asset_dir=args.outdir)
   for line in script:
     print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
 
   if args.posts:
-    get_posts(script, out_path=args.outdir)
+    get_posts(script, out_dir=args.outdir)
 
   if args.tts:
-    do_tts(script, out_path=args.outdir)
+    do_tts(script, out_dir=args.outdir)
 
   if args.phonemes:
-    do_phonemes(script, out_path=args.outdir)
+    do_phonemes(script, out_dir=args.outdir)
 
   if args.videos:
-    get_video_info(script, out_path=args.outdir)
+    get_video_info(script, out_dir=args.outdir)
 
 if __name__ == '__main__':
   main()
