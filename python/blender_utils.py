@@ -227,7 +227,7 @@ def add_video_billboard(video_path, name, loc=[0,0,0], scale=1):
   bpy.ops.mesh.uv_texture_add()
   material_name = name + '-material'
   texture_name = name + '-texture'
-  (mtex, tex) = add_video_texture(plane, video_path, name + "_texture")
+  (mtex, tex) = add_video_texture(plane, video_path, name + "-texture")
   # scale the billboard to match image dimensions
   sz = tex.image.size
   x = sz[0]
