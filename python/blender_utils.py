@@ -154,13 +154,23 @@ def add_video_texture(obj, video_path, texture_name):
   """
   try:
     img = bpy.data.images.load(video_path)
+    # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
+    #img.use_cyclic = True
+    print(img.resolution)
+    duration = img.frame_duration
+    print(duration)
+    with open(texture_name + "_xxx.txt", "w") as f:
+      f.write("duration: " + str(img.frame_duration))
+      f.close()
   except:
-    raise NameError("Cannot load video %s" % img_path)
+    raise NameError("Cannot load video %s" % video_path)
  
   # documentation indicates we can use IMAGE here for videos
   ctex = bpy.data.textures.new(texture_name, type = 'IMAGE')
   ctex.image = img
 
+  ctex.image_user.frame_duration = img.frame_duration
+  
   # Create new material
   mtex = bpy.data.materials.new(texture_name + '-material')
   mtex.diffuse_color = (1, 1, 1)
@@ -168,11 +178,14 @@ def add_video_texture(obj, video_path, texture_name):
   #mtex.use_transparency = True
   mtex.alpha = 0.0
   
+  
   slot = mtex.texture_slots.add()
   slot.texture = ctex
   slot.texture_coords = 'UV'
   #slot.use_map_alpha = True
 
+  #img.frame_duration = 400
+  
   obj.data.materials.append(mtex)
   return (mtex, ctex)
 
