@@ -4,10 +4,26 @@
 import re
 from phonemes import Tokenizer as PhonemeTokenizer
 
+class Video(object):
+  def __init__(self, filename, start_frame, fps):
+    self._filename = filename
+    self._start_frame = start_frame
+    # TODO: correctly calculate endframe or feed as arg
+    self._end_frame = start_frame + fps
+    self._fps = fps
+
+  def get_frame(self, frame):
+    if frame >= self._start_frame and frame <= self._end_frame:
+      return frame;
+    return None
+
+
 class AnimationController(object):
-  def __init__(self, on_frame_handler=None):
-    self._on_frame_handler=on_frame_handler
+  def __init__(self, on_utterance=None, on_video=None):
+    self._on_utterance = on_utterance
+    self._on_video = on_video
     self._utterances = []
+    self._videos = []
 
   def add_utterance(self, speaker, start_frame, phoneme_file, fps=24):
     s = PhonemeTokenizer(phoneme_file, start_frame=start_frame, speaker=speaker)
@@ -15,14 +31,26 @@ class AnimationController(object):
       self._utterances.append(s)
     print("number of utterances now: " + str(len(self._utterances)))
 
-  def set_on_frame_handler(self, handler):
-    print("SET ON FRAME HANDLER TO " + str(handler))
-    self._on_frame_handler = handler
+  def add_video(self, speaker, video, start_frame, fps=30):
+   print("Going to play video {video} at frame {frame}".format(video=video, start_frame=frame))
+   self._videos.append(Video(video, start_frame, fps))
+
+
+  def set_on_utterance(self, handler):
+    self._on_utterance = handler
+
+  def set_on_video(self, handler):
+    self._on_video = handler
 
   def update(self, frame):
     for u in self._utterances:
-      #x.nothing()
       s = u.get_sound(frame)
-      if s and self._on_frame_handler:
-        self._on_frame_handler(frame, s)
+      if s and self._on_utterance:
+        self._on_utterance(frame, s)
+    
+    for vid in self._videos:
+      s = vid.get_frame(frame)
+      if s and self._on_video:
+        #TODO: update blender video texture in some way?
+        self._on_video(frame)
 

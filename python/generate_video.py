@@ -68,15 +68,19 @@ def set_mouth_img(obj, _pos):
       print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
       #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
 
-def on_animation_frame(frame, s):
+def on_utterance_frame(frame, s):
   obj = get_object_by_name('mouth')
   set_mouth_img(obj, s.sound())
   #set_mouth_img(obj, frame % 9)
- 
+
+def on_video_frame(frame, s):
+  pass
+
 def update_phoneme(scene):
   global animation_controller
   #animation_controller.set_on_frame_handler(on_animation_frame)
-  animation_controller._on_frame_handler = on_animation_frame
+  animation_controller._on_utterance = on_utterance_frame
+  animation_controller._on_video = on_video_frame
   scene = bpy.data.scenes['Scene']
   frame = scene.frame_current
   animation_controller.update(frame)
@@ -113,7 +117,6 @@ def generate_video():
   if args.save:
     blendfile_to_save = args.save
 
-
   context = bpy.context
   scene = bpy.context.scene
   world = bpy.context.scene.world
@@ -144,15 +147,23 @@ def generate_video():
   for i in range(len(script._lines)):
     print("line: " + str(i) + " end_frame: " + str(end_frame))
     line = script._lines[i]
+    if line._video:
+      # Add video to timeline, get length
+      _start = end_frame
+      print("LINE: video {video} at frame {start}".format(video=line._video, start=_start)) 
+      length = 30
+      end_frame = end_frame + length
+      continue
+
     audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
     if line._audio_file:
       audio_file = line._audio_file
     phoneme_file = audio_file + '.phonemes.out.txt'
     if line._phoneme_file:
       phoneme_file = line._phoneme_file
-    animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
-    soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
-    end_frame = soundstrip.frame_final_end #frame_duration
+      animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
+      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
+      end_frame = soundstrip.frame_final_end #frame_duration
 
 
   filepath = "models/person.blend"
