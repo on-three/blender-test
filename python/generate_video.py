@@ -153,7 +153,7 @@ def generate_video():
       print("LINE: video {video} at frame {start}".format(video=line._video, start=_start)) 
       length = 30
       end_frame = end_frame + length
-      add_video_billboard(line._video, line._speaker)
+      add_video_billboard(line._video, line._speaker, loc=[-7,4,0], scale=0.01)
       continue
 
     audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'

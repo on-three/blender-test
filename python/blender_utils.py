@@ -153,8 +153,8 @@ def add_video_texture(obj, video_path, texture_name):
     raise NameError("Cannot load video %s" % img_path)
  
   # documentation indicates we can use IMAGE here for videos
-  cTex = bpy.data.textures.new(texture_name, type = 'IMAGE')
-  cTex.image = img
+  ctex = bpy.data.textures.new(texture_name, type = 'IMAGE')
+  ctex.image = img
 
   # Create new material
   mtex = bpy.data.materials.new(texture_name + '-material')
@@ -164,12 +164,12 @@ def add_video_texture(obj, video_path, texture_name):
   mtex.alpha = 0.0
   
   slot = mtex.texture_slots.add()
-  slot.texture = cTex
+  slot.texture = ctex
   slot.texture_coords = 'UV'
   #slot.use_map_alpha = True
 
   obj.data.materials.append(mtex)
-  return mtex
+  return (mtex, ctex)
 
 
 
@@ -227,11 +227,11 @@ def add_video_billboard(video_path, name, loc=[0,0,0], scale=1):
   bpy.ops.mesh.uv_texture_add()
   material_name = name + '-material'
   texture_name = name + '-texture'
-  tex = add_video_texture(plane, video_path, name + "_texture")
+  (mtex, tex) = add_video_texture(plane, video_path, name + "_texture")
   # scale the billboard to match image dimensions
-  #sz = tex.image.size
-  x = 100; #sz[0]
-  y = 100; #sz[1]
+  sz = tex.image.size
+  x = sz[0]
+  y = sz[1]
   plane.scale = (x*scale, y*scale, 1)
   return plane
  
