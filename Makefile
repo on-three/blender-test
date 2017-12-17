@@ -48,7 +48,7 @@ $(TARGET): $(MOV_OUT)
 
 $(MOV_OUT): $(BLENDER_SCRIPT) $(TMP_DIR)
 	mkdir -p $(@D)
-	./$(PYTHON_DIR)/script.py $(SCRIPTS_DIR)/$(SCRIPT) --tts --phonemes --posts -o $(TMP_DIR)
+	./$(PYTHON_DIR)/script.py $(SCRIPTS_DIR)/$(SCRIPT) --tts --phonemes --posts --videos -o $(TMP_DIR)
 	$(BLENDER) --background --python $< '$(SCRIPTS_DIR)/$(SCRIPT) --out $@ $(SCRIPT_ARGS)'
 	
 play: $(TARGET)

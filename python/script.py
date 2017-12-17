@@ -10,6 +10,7 @@ import argparse
 import os.path
 import re
 import pipes
+import ntpath
 
 class Line(object):
   # infer phoneme files via filename
@@ -29,6 +30,9 @@ class Line(object):
   def gen_filename(self, path, extension):
     if self._post:
       return path +'/' + self._post + extension
+    elif self._video:
+      vid = ntpath.basename(self._video)
+      return path + '/' + vid + extension
     elif self._speaker:
       return path + '/' + str(self._index) + '.' + self._speaker + extension
     else:
@@ -211,6 +215,24 @@ def get_posts(script, out_path='./tmp/'):
       os.system(cmd)
       # TODO: check files now exist or throw
 
+def get_video_info(script, out_path='./tmp/'):
+  """
+  Generate video (and audio) info files off input video files
+  ARGS:
+    filepath: path to input audio file
+    out_path: output directory for generated phoeneme file.
+  """
+  for line in script:
+    filename = line._video or line._audio_file
+    if filename:
+      print("**** " + filename)
+      outfile = line.gen_filename(out_path, '.runtime.txt')
+      cmd = 'ffprobe -i "{filename}" -show_entries format=duration -v quiet -of csv="p=0" > {outfile}'.format(filename=filename, outfile=outfile)
+      print("Generating video length file for input media file " + filename)
+      print(cmd)
+      os.system(cmd)
+
+
 """
   Main provides a tool that generates tts and phoneme files from a script,
   leveraging the classes above, but the classes above should be used
@@ -222,6 +244,7 @@ def main():
   parser.add_argument('infile', action="store")
   parser.add_argument('--tts', action="store_true", default=False)
   parser.add_argument('--phonemes', action="store_true", default=False)
+  parser.add_argument('--videos', action="store_true", default=False)
   parser.add_argument('-o', '--outdir', type=str, default='./tmp/')
   parser.add_argument('--posts', action="store_true", default=False, help="create snapshots of post numbers in script.")
   args = parser.parse_args()
@@ -243,6 +266,9 @@ def main():
 
   if args.phonemes:
     do_phonemes(script, out_path=args.outdir)
+
+  if args.videos:
+    get_video_info(script, out_path=args.outdir)
 
 if __name__ == '__main__':
   main()
