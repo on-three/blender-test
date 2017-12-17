@@ -46,6 +46,11 @@ def get_object_by_name (name= ""):
       return r
   return r
 
+def hide_obj(obj, hide=True):
+  for child in obj.children:
+    child.hide_render = hide
+    hide_obj(child, hide)
+
 def look_at(obj_camera, point):
   """
   Configure the current scene camera to look at a specific point in 3Space
@@ -204,7 +209,7 @@ def add_billboard(img_path, n, loc=[0,0,0], scale=1):
   plane.scale = (x*scale, y*scale, 1)
   return plane
  
-def add_video_billboard(video_path, name, loc=[0,0,0], scale=1):
+def add_video_billboard(video_path, name, loc=[0,0,0], scale=1, frame=0):
   """
   Add a simple billboard at a given location in 3Space.
   It will be sized according to the image dimensions.
@@ -233,6 +238,7 @@ def add_video_billboard(video_path, name, loc=[0,0,0], scale=1):
   x = sz[0]
   y = sz[1]
   plane.scale = (x*scale, y*scale, 1)
+  tex.image_user.frame_start = frame
   return plane
  
 

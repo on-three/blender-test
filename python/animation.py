@@ -5,16 +5,17 @@ import re
 from phonemes import Tokenizer as PhonemeTokenizer
 
 class Video(object):
-  def __init__(self, filename, start_frame, fps):
+  def __init__(self, filename, name, start_frame, end_frame, fps):
     self._filename = filename
+    self._name = name
     self._start_frame = start_frame
     # TODO: correctly calculate endframe or feed as arg
-    self._end_frame = start_frame + fps
+    self._end_frame = end_frame #start_frame + fps
     self._fps = fps
 
   def get_frame(self, frame):
     if frame >= self._start_frame and frame <= self._end_frame:
-      return frame;
+      return self;
     return None
 
 
@@ -31,9 +32,9 @@ class AnimationController(object):
       self._utterances.append(s)
     print("number of utterances now: " + str(len(self._utterances)))
 
-  def add_video(self, speaker, video, start_frame, fps=30):
-   print("Going to play video {video} at frame {frame}".format(video=video, start_frame=frame))
-   self._videos.append(Video(video, start_frame, fps))
+  def add_video(self, speaker, video, start_frame, end_frame, fps=30):
+   print("Going to play video {video} at frame {start_frame}".format(video=video, start_frame=start_frame))
+   self._videos.append(Video(video, speaker, start_frame, end_frame, fps))
 
 
   def set_on_utterance(self, handler):
@@ -52,5 +53,5 @@ class AnimationController(object):
       s = vid.get_frame(frame)
       if s and self._on_video:
         #TODO: update blender video texture in some way?
-        self._on_video(frame)
+        self._on_video(s,frame)
 

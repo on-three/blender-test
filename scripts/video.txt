@@ -2,3 +2,4 @@
 # These files should not have background noise, and be for a single speaker's utterance
 SPEAKER: And now, a short video.
 SCREEN: (VIDEO: ./video/triangles.avi)
+SPEAKER: Thank you for viewing.

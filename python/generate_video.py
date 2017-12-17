@@ -35,6 +35,7 @@ from blender_utils import look_at
 from blender_utils import add_background
 from blender_utils import add_billboard
 from blender_utils import add_video_billboard
+from blender_utils import hide_obj
 
 animation_controller = AnimationController()
 
@@ -73,8 +74,16 @@ def on_utterance_frame(frame, s):
   set_mouth_img(obj, s.sound())
   #set_mouth_img(obj, frame % 9)
 
-def on_video_frame(frame, s):
-  pass
+def on_video_frame(video, frame):
+  #obj_name = "SPEAKER"
+  #filename = "./video/tits.avi"
+  if frame == video._start_frame:
+    bb = add_video_billboard(video._filename, video._name, loc=[-7,3.5,0], scale=0.02, frame=frame)
+  elif frame == video._end_frame:
+    bpy.data.objects[video._name].select = True
+    bpy.ops.object.delete()
+    
+
 
 def update_phoneme(scene):
   global animation_controller
@@ -149,11 +158,12 @@ def generate_video():
     line = script._lines[i]
     if line._video:
       # Add video to timeline, get length
-      _start = end_frame
-      print("LINE: video {video} at frame {start}".format(video=line._video, start=_start)) 
-      length = 30
+      start_frame = end_frame
+      print("LINE: video {video} at frame {start}".format(video=line._video, start=start_frame)) 
+      length = 240
       end_frame = end_frame + length
-      add_video_billboard(line._video, line._speaker, loc=[-7,4,0], scale=0.01)
+      animation_controller.add_video(line._speaker, line._video, start_frame, end_frame, 30)
+      add_video_billboard('./video/tits.avi', 'TITS', loc=[0,0,0], scale=0.015, frame=0)
       continue
 
     audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
