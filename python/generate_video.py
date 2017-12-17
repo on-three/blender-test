@@ -23,7 +23,7 @@ for x in sys.path:
 
 from phonemes import Phoneme
 from phonemes import Tokenizer
-from phonemes import AnimationController
+from animation import AnimationController
 from script import Script
 from script import Line
 
