@@ -3,15 +3,36 @@
 
 import re
 from phonemes import Tokenizer as PhonemeTokenizer
+import bpy
 
 class Video(object):
-  def __init__(self, filename, name, start_frame, end_frame, fps):
+  def __init__(self, filename, name, start_frame, fps):
     self._filename = filename
     self._name = name
     self._start_frame = start_frame
     # TODO: correctly calculate endframe or feed as arg
-    self._end_frame = end_frame #start_frame + fps
+    #self._end_frame = end_frame #start_frame + fps
     self._fps = fps
+    # we may not add it to a mesh until later, but attempt to preload
+    # the video texture as we can access video length (in frames)
+    img = bpy.data.images.load(filename)
+    # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
+    #img.use_cyclic = True
+    print(img.resolution)
+    duration = img.frame_duration
+    print(duration)
+ 
+    # documentation indicates we can use IMAGE here for videos
+    ctex = bpy.data.textures.new(filename, type = 'IMAGE')
+    ctex.image = img
+    ctex.image_user.frame_duration = img.frame_duration
+    self._length = img.frame_duration
+    # unless there's an override, define end_frame as start_frame + length
+    self._end_frame = self._start_frame + self._length
+    self._movie = img
+    self._texture = ctex
+
+
 
   def get_frame(self, frame):
     if frame >= self._start_frame and frame <= self._end_frame:
@@ -31,10 +52,13 @@ class AnimationController(object):
     if s:
       self._utterances.append(s)
     print("number of utterances now: " + str(len(self._utterances)))
+    return s
 
-  def add_video(self, speaker, video, start_frame, end_frame, fps=30):
+  def add_video(self, speaker, video, start_frame, fps=30):
    print("Going to play video {video} at frame {start_frame}".format(video=video, start_frame=start_frame))
-   self._videos.append(Video(video, speaker, start_frame, end_frame, fps))
+   vid = Video(video, speaker, start_frame, fps)
+   self._videos.append(vid)
+   return vid
 
 
   def set_on_utterance(self, handler):

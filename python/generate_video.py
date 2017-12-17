@@ -160,10 +160,9 @@ def generate_video():
       # Add video to timeline, get length
       start_frame = end_frame
       print("LINE: video {video} at frame {start}".format(video=line._video, start=start_frame)) 
-      length = 100
-      end_frame = end_frame + length
-      animation_controller.add_video(line._speaker, line._video, start_frame, end_frame, 30)
-      add_video_billboard('./video/tits.avi', 'TITS', loc=[0,0,0], scale=0.015, frame=0)
+      vid = animation_controller.add_video(line._speaker, line._video, start_frame, 30)
+      end_frame = vid._end_frame
+      #add_video_billboard('./video/tits.avi', 'TITS', loc=[0,0,0], scale=0.015, frame=0)
       continue
 
     audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
