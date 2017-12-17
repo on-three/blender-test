@@ -34,7 +34,7 @@ from blender_utils import get_object_by_name
 from blender_utils import look_at
 from blender_utils import add_background
 from blender_utils import add_billboard
-
+from blender_utils import add_video_billboard
 
 animation_controller = AnimationController()
 
@@ -153,6 +153,7 @@ def generate_video():
       print("LINE: video {video} at frame {start}".format(video=line._video, start=_start)) 
       length = 30
       end_frame = end_frame + length
+      add_video_billboard(line._video, line._speaker)
       continue
 
     audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'

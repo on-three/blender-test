@@ -139,6 +139,39 @@ def add_texture(obj, img_path, texture_name):
   obj.data.materials.append(mtex)
   return (mtex, cTex)
 
+def add_video_texture(obj, video_path, texture_name):
+  """
+  Add a video texture to the provided object.
+  This is mainly a utility function used by add_billboard function and
+  I don't recommend using it in other modules.
+  Args:
+    obj: Blender object we'll add a texture to
+  """
+  try:
+    img = bpy.data.images.load(video_path)
+  except:
+    raise NameError("Cannot load video %s" % img_path)
+ 
+  # documentation indicates we can use IMAGE here for videos
+  cTex = bpy.data.textures.new(texture_name, type = 'IMAGE')
+  cTex.image = img
+
+  # Create new material
+  mtex = bpy.data.materials.new(texture_name + '-material')
+  mtex.diffuse_color = (1, 1, 1)
+  mtex.transparency_method = 'Z_TRANSPARENCY'
+  #mtex.use_transparency = True
+  mtex.alpha = 0.0
+  
+  slot = mtex.texture_slots.add()
+  slot.texture = cTex
+  slot.texture_coords = 'UV'
+  #slot.use_map_alpha = True
+
+  obj.data.materials.append(mtex)
+  return mtex
+
+
 
 def add_billboard(img_path, n, loc=[0,0,0], scale=1):
   """
@@ -168,6 +201,37 @@ def add_billboard(img_path, n, loc=[0,0,0], scale=1):
   sz = tex.image.size
   x = sz[0]
   y = sz[1]
+  plane.scale = (x*scale, y*scale, 1)
+  return plane
+ 
+def add_video_billboard(video_path, name, loc=[0,0,0], scale=1):
+  """
+  Add a simple billboard at a given location in 3Space.
+  It will be sized according to the image dimensions.
+  Generally I'd suggest using 'import as plane' in blender rather
+  than using this.
+  Args:
+    img_path: path to image we'll load on the billboard
+    n: string name of the new object to help manipulating later
+    loc: 3Space coordinates (array) of position of billboard center.
+    scale: scaling factor evenly applied to all dimensions of billboard.
+  """
+  context = bpy.context
+  bpy.ops.mesh.primitive_plane_add(view_align=True,
+  radius=1,
+  location=loc,
+  rotation=[0, 0, 0])
+  plane = context.object
+  plane.name = name
+  bpy.context.scene.layers[2] = True
+  bpy.ops.mesh.uv_texture_add()
+  material_name = name + '-material'
+  texture_name = name + '-texture'
+  tex = add_video_texture(plane, video_path, name + "_texture")
+  # scale the billboard to match image dimensions
+  #sz = tex.image.size
+  x = 100; #sz[0]
+  y = 100; #sz[1]
   plane.scale = (x*scale, y*scale, 1)
   return plane
  
