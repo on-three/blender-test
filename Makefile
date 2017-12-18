@@ -1,4 +1,5 @@
 
+TMP_ROOT := tmp
 SCRIPTS_DIR := scripts
 TOOL_DIR := tools
 PYTHON_DIR := python
@@ -12,7 +13,7 @@ TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
 MOV_OUT ?= $(TARGET:$(TARGET_EXT)=.mov)
 
-TMP_DIR := tmp/$(SCRIPT)
+TMP_DIR := $(TMP_ROOT)/$(SCRIPT)
 
 # some additional args that are passed to blender via
 # the SCRIPT_ARGS variable
@@ -56,7 +57,7 @@ play: $(TARGET)
 
 clean:
 	rm -fr $(OUT_DIR)
-	rm -fr $(TMP_DIR)
+	rm -fr $(TMP_ROOT)
 
 $(TMP_DIR):
 	mkdir -p $@
