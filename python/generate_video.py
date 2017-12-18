@@ -40,17 +40,13 @@ from blender_utils import hide_obj
 animation_controller = AnimationController()
 
 def set_mouth_img(obj, _pos):
-  # position 0 mps to silence (SIL) so we can hide the "mouth"
-  #if pos == 0:
-  #  obj.hide = True
-  #  return
-
-  #obj.hide = False
-
-  # phonemee sounds are one based, but indexes into image are zro based
-  #pos = _pos -1
-  pos = _pos
-  
+  """ Mouth positions arem apped 0->9 as described in phonemes.py
+  We set the "position" by remapping UV coordinates for an object
+  called "mouth" somwhere in the scene.
+  The layout of the mouths texture a simple 4x4 layout with
+  zero position in the UL corner.
+  """
+  pos = _pos  
   # U,V coordinates are reversed in Y direction
   # and pos 0 serves as both "A" and "SIL"
   x1 = (pos % 4) * 0.25
@@ -67,16 +63,22 @@ def set_mouth_img(obj, _pos):
     for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
       uv_coords = obj.data.uv_layers.active.data[loop_idx].uv
       print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
-      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
 
 def on_utterance_frame(frame, s):
+  """
+  callback invoked once per frame by animation system to set a
+  mouth object to the proper texture as provided by phonemes in
+  the animation.
+  """
   obj = get_object_by_name('mouth')
   set_mouth_img(obj, s.sound())
-  #set_mouth_img(obj, frame % 9)
 
 def on_video_frame(video, frame):
-  #obj_name = "SPEAKER"
-  #filename = "./video/tits.avi"
+  """
+  callback invoked once per frame (before render) to create/destroy video objects
+  as they are played by the animation.
+  Yes I'd like to simply hide them for greater control but blender sux, so...
+  """
   if frame == video._start_frame:
     bb = add_video_billboard(video._filename, video._name, loc=[-7,3.5,0], scale=0.02, frame=frame)
   elif frame == video._end_frame:
@@ -84,17 +86,15 @@ def on_video_frame(video, frame):
     bpy.ops.object.delete()
     
 
+# set callbacks in the animation controller
+animation_controller._on_utterance = on_utterance_frame
+animation_controller._on_video = on_video_frame
 
-def update_phoneme(scene):
+def on_before_render(scene):
   global animation_controller
-  #animation_controller.set_on_frame_handler(on_animation_frame)
-  animation_controller._on_utterance = on_utterance_frame
-  animation_controller._on_video = on_video_frame
   scene = bpy.data.scenes['Scene']
   frame = scene.frame_current
   animation_controller.update(frame)
-  #obj = returnObjectByName('mouth')
-  #set_mouth_img(obj, frame % 9)
    
 
 def generate_video():
@@ -178,7 +178,7 @@ def generate_video():
         f.close()
 
   # run a handler on each frame
-  bpy.app.handlers.frame_change_pre.append(update_phoneme)
+  bpy.app.handlers.frame_change_pre.append(on_before_render)
 
 # TODO: ability to cap frame limit for test renders
   bpy.context.scene.frame_end = end_frame
