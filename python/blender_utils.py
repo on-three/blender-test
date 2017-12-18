@@ -253,5 +253,29 @@ def add_video_billboard(video_path, name, loc=[0,0,0], scale=1, frame=0):
   plane.scale = (x*scale, y*scale, 1)
   tex.image_user.frame_start = frame
   return plane
- 
+
+def add_action(obj_name, action_name, start_frame):
+  """
+  Method returns an object describing the added action
+  ESPECIALLY the ending frame for the strip added to the NLA editor
+  """
+  #try:
+  #    selected_strips = [strip for strip in bpy.context.object.animation_data.nla_tracks.active.strips if strip.select]
+  #    except AttributeError:
+  #        selected_strips = []
+
+  #bject.animation_data_create()
+  #object.animation_data.action = bpy.data.actions.get("anotheraction")
+
+  #obj = bpy.data.objects[obj_name]
+  #if not obj:
+  #  return None
+
+  #if obj.animation_data is not None:
+  #  action = obj.animation_data.action
+  #  if action is not None:
+  #    track = obj.animation_data.nla_tracks.new()
+  #    track.strips.new(action.name, action.frame_range[0], action)
+  #    obj.animation_data.action = None
+  pass
 

@@ -127,6 +127,11 @@ def generate_video():
   if args.save:
     blendfile_to_save = args.save
 
+  # Load our default scene and assets.
+  # TODO: specify this by argument
+  bpy.ops.wm.open_mainfile(filepath="./models/default.blend")
+
+
   context = bpy.context
   scene = bpy.context.scene
   world = bpy.context.scene.world
@@ -134,19 +139,18 @@ def generate_video():
     scene.sequence_editor_create()
 
   # clear everything and set up our scene
-  delete_scene_objects()
-  set_render_settings()
-
+  #delete_scene_objects()
+  #set_render_settings()
   
   # Environment lighting
-  wset = world.light_settings
-  wset.use_environment_light = True
-  wset.use_ambient_occlusion = True
-  wset.ao_blend_type = 'MULTIPLY'
-  wset.ao_factor = 0.8
-  wset.gather_method = 'APPROXIMATE'
+  #wset = world.light_settings
+  #wset.use_environment_light = True
+  #wset.use_ambient_occlusion = True
+  #wset.ao_blend_type = 'MULTIPLY'
+  #wset.ao_factor = 0.8
+  #wset.gather_method = 'APPROXIMATE'
 
-  end_frame = 0
+    end_frame = 0
   
   # load a script passed as argument
   print("opening file: " + script_filepath)
@@ -176,39 +180,36 @@ def generate_video():
       soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
       end_frame = soundstrip.frame_final_end #frame_duration
 
-
-  filepath = "models/person.blend"
-
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(update_phoneme)
 
   # add a mouth and a girl anime head
-  img = add_billboard('img/anime-mouths.png', 'mouth', loc=[1.5,-5.5,0], scale=0.0015)
-  add_billboard('img/anime-girl-head.png', 'background', loc=[0,0,0], scale=0.004)
+  #img = add_billboard('img/anime-mouths.png', 'mouth', loc=[1.5,-5.5,0], scale=0.0015)
+  #add_billboard('img/anime-girl-head.png', 'background', loc=[0,0,0], scale=0.004)
   
   # and a background
-  add_billboard('img/classroom.jpg', 'background', loc=[0,0,0], scale=0.015)
+  #add_billboard('img/classroom.jpg', 'background', loc=[0,0,0], scale=0.015)
  
   # add a camera
-  bpy.ops.object.camera_add(view_align=False,
-    location=[0, 0, 30],
-    rotation=[0, 0, 0])
-  camera = context.object
-  bpy.context.scene.camera = camera
-  look_at(camera, [0,0,0]) 
-  camera.name = 'Camera'
+  #bpy.ops.object.camera_add(view_align=False,
+  #  location=[0, 0, 30],
+  #  rotation=[0, 0, 0])
+  #camera = context.object
+  #bpy.context.scene.camera = camera
+  #look_at(camera, [0,0,0]) 
+  #camera.name = 'Camera'
 
   # set up render settings
-  for scene in bpy.data.scenes:
-    scene.render.image_settings.file_format = 'H264'
-    scene.render.ffmpeg.format = 'QUICKTIME'
-    scene.render.image_settings.color_mode = 'RGB'
-    scene.render.ffmpeg.audio_codec = 'AAC'
-    scene.render.ffmpeg.audio_bitrate = 128
-    scene.render.resolution_percentage = 100
-    bpy.context.scene.frame_start = 0
-    bpy.context.scene.frame_end = end_frame #frame_num
-    bpy.context.scene.render.filepath = out_filepath
+  #for scene in bpy.data.scenes:
+  #  scene.render.image_settings.file_format = 'H264'
+  #  scene.render.ffmpeg.format = 'QUICKTIME'
+  #  scene.render.image_settings.color_mode = 'RGB'
+  #  scene.render.ffmpeg.audio_codec = 'AAC'
+  #  scene.render.ffmpeg.audio_bitrate = 128
+  #  scene.render.resolution_percentage = 100
+  #  bpy.context.scene.frame_start = 0
+  #  bpy.context.scene.frame_end = end_frame #frame_num
+  bpy.context.scene.render.filepath = out_filepath
  
   if blendfile_to_save:
     print("Saving script configuration as blend file: " + blendfile_to_save)
