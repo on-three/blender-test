@@ -167,37 +167,21 @@ def generate_video():
       phoneme_file = line._phoneme_file
       animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
       soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
+      # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
+      print(str(soundstrip.frame_final_end))
+      duration = soundstrip.frame_final_end
+      print(duration)
+
       end_frame = soundstrip.frame_final_end #frame_duration
+      with open("tmp.file.txt", "w") as f:
+        f.write("After adding utterance video end-frame is at {d}".format(d=str(end_frame)))
+        f.close()
 
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(update_phoneme)
 
-  # add a mouth and a girl anime head
-  #img = add_billboard('img/anime-mouths.png', 'mouth', loc=[1.5,-5.5,0], scale=0.0015)
-  #add_billboard('img/anime-girl-head.png', 'background', loc=[0,0,0], scale=0.004)
-  
-  # and a background
-  #add_billboard('img/classroom.jpg', 'background', loc=[0,0,0], scale=0.015)
- 
-  # add a camera
-  #bpy.ops.object.camera_add(view_align=False,
-  #  location=[0, 0, 30],
-  #  rotation=[0, 0, 0])
-  #camera = context.object
-  #bpy.context.scene.camera = camera
-  #look_at(camera, [0,0,0]) 
-  #camera.name = 'Camera'
-
-  # set up render settings
-  #for scene in bpy.data.scenes:
-  #  scene.render.image_settings.file_format = 'H264'
-  #  scene.render.ffmpeg.format = 'QUICKTIME'
-  #  scene.render.image_settings.color_mode = 'RGB'
-  #  scene.render.ffmpeg.audio_codec = 'AAC'
-  #  scene.render.ffmpeg.audio_bitrate = 128
-  #  scene.render.resolution_percentage = 100
-  #  bpy.context.scene.frame_start = 0
-  #  bpy.context.scene.frame_end = end_frame #frame_num
+# TODO: ability to cap frame limit for test renders
+  bpy.context.scene.frame_end = end_frame
   bpy.context.scene.render.filepath = out_filepath
  
   if blendfile_to_save:
