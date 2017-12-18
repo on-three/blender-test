@@ -138,19 +138,8 @@ def generate_video():
   if not scene.sequence_editor:
     scene.sequence_editor_create()
 
-  # clear everything and set up our scene
-  #delete_scene_objects()
-  #set_render_settings()
-  
-  # Environment lighting
-  #wset = world.light_settings
-  #wset.use_environment_light = True
-  #wset.use_ambient_occlusion = True
-  #wset.ao_blend_type = 'MULTIPLY'
-  #wset.ao_factor = 0.8
-  #wset.gather_method = 'APPROXIMATE'
-
-    end_frame = 0
+  # end_frame tracks the length in total frames of generated video
+  end_frame = 0
   
   # load a script passed as argument
   print("opening file: " + script_filepath)
