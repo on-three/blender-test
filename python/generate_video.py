@@ -80,7 +80,7 @@ def on_video_frame(video, frame):
   Yes I'd like to simply hide them for greater control but blender sux, so...
   """
   if frame == video._start_frame:
-    bb = add_video_billboard(video._filename, video._name, loc=[-7,3.5,0], scale=0.02, frame=frame)
+    bb = add_video_billboard(video._filename, video._name, loc=[-0.3,0.16,1.0], scale=0.5, frame=frame)
   elif frame == video._end_frame:
     bpy.data.objects[video._name].select = True
     bpy.ops.object.delete()
@@ -180,7 +180,8 @@ def generate_video():
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(on_before_render)
 
-# TODO: ability to cap frame limit for test renders
+  # TODO: ability to cap frame limit for test renders
+  end_frame = 48
   bpy.context.scene.frame_end = end_frame
   bpy.context.scene.render.filepath = out_filepath
  

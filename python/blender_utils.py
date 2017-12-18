@@ -248,8 +248,11 @@ def add_video_billboard(video_path, name, loc=[0,0,0], scale=1, frame=0):
   (mtex, tex) = add_video_texture(plane, video_path, name + "-texture")
   # scale the billboard to match image dimensions
   sz = tex.image.size
-  x = sz[0]
-  y = sz[1]
+  # we scale the plane we created to match movie dimensions
+  # AND the scale used by "import as plan" extension in blender, where
+  # a 1024x1024 image is imported as a 1.024x1.024 square.
+  x = sz[0]/1000.0
+  y = sz[1]/1000.0
   plane.scale = (x*scale, y*scale, 1)
   tex.image_user.frame_start = frame
   return plane
