@@ -181,7 +181,7 @@ def generate_video():
   bpy.app.handlers.frame_change_pre.append(on_before_render)
 
   # TODO: ability to cap frame limit for test renders
-  end_frame = 48
+  #end_frame = 48
   bpy.context.scene.frame_end = end_frame
   bpy.context.scene.render.filepath = out_filepath
  
