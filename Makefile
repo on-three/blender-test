@@ -37,8 +37,6 @@ FFMPEG ?= ffmpeg
 #DISPLAY := display
 DISPLAY := chromium-browser
 
-run: $(TARGET)
-
 # audio dpendency file
 #$(AUDIO_DIR)/audio.d: $(SCRIPTS_DIR)/$(SCRIPT)
 #	./scripts/script.py $< -tts
@@ -65,4 +63,9 @@ $(TMP_DIR):
 #frommp3: $(MP3)
 #	mkdir -p $(@D)
 #	$(BLENDER) --background --python $(SCRIPTS_DIR)/$(BLENDER_SCRIPT).py $(MP3) $(OUT_DIR)/$(SCRIPT).mov
-	
+
+# infer an unknown rule as a possible scrptfile
+%::
+	$(MAKE) SCRIPT=$@
+
+
