@@ -36,8 +36,6 @@ FFMPEG ?= ffmpeg
 #DISPLAY := display
 DISPLAY := chromium-browser
 
-run: $(TARGET)
-
 # audio dpendency file
 #$(AUDIO_DIR)/audio.d: $(SCRIPTS_DIR)/$(SCRIPT)
 #	./scripts/script.py $< -tts
