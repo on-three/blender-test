@@ -9,18 +9,22 @@ class Line(object):
   # infer phoneme files via filename
   PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
 
-  def __init__(self, text, index, speaker=None):
-    self._speaker = speaker
-    self._text = text
-    self._index = index
-    self._audio_file = None
-    self._phoneme_file = None
-
   def gen_filename(self, path, extension):
     if self._speaker:
       return path + '/' + str(self._index) + '.' +  self._speaker + extension
     else:
       return path + '/' + str(self._index) + extension
+  
+  def __init__(self, text, index, speaker=None, asset_dir='./tmp'):
+    # simply put this 'line' is meaningless without additional assets
+    # so an asset directory is really needed to infer assets
+    self._asset_dir = asset_dir
+    self._speaker = speaker
+    self._text = text
+    self._index = index
+    self._audio_file = self.gen_filename(asset_dir, '.mp3')
+    self._phoneme_file = self._audio_file + '.phonemes.txt'
+
 	
   def gen_audio_file(self, out_dir='./tmp'):
     outfile = self._audio_file or self.gen_filename(out_dir, '.mp3')
@@ -51,35 +55,38 @@ class Line(object):
     print("Generating phonemes file for input audio file " + infile)
     os.system(cmd)
 
-  def animate(self, animation_controller, current_frame):
+  def animate(self, scene, animation_controller, current_frame):
     """Handle a spoken line
     """
-    scene = bpy.data.scenes['scene']
-    audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
+    end_frame = current_frame
+    audio_file = self._audio_file
+    # fail if the required audio file is not present
+    if not os.path.isfile(audio_file):
+      raise IOError("Could not find requried audio file: %s" % audio_file)
+
+    phoneme_file = self._phoneme_file
+    if not os.path.isfile(phoneme_file):
+      raise IOError("Coudld not find requried phoneme file: %s" % phoneme_file)
     if self._audio_file:
-      audio_file = self._audio_file
-    phoneme_file = audio_file + '.phonemes.out.txt'
-    if self._phoneme_file:
-      phoneme_file = line._phoneme_file
-      animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
-      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
+      animation_controller.add_utterance(self._speaker, current_frame, phoneme_file)
+      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, current_frame)
       # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
       print(str(soundstrip.frame_final_end))
       duration = soundstrip.frame_final_end
       print(duration)
 
       end_frame = soundstrip.frame_final_end #frame_duration
-      return end_frame
+    return end_frame
  
   @staticmethod
-  def parse(script, index, line, tmp_dir='./tmp'):
+  def parse(script, index, line, asset_dir='./tmp'):
 		# eliminate comments
     line = line.split('#')[0].strip()
     if not len(line):
-			return index
+      return index
 
-		# first remove speaker at start of line if there is one
-		# There may or may not be a speaker for a line
+    # first remove speaker at start of line if there is one
+    # There may or may not be a speaker for a line
     speaker = None
 
     speaker_regex = re.compile(r'^(?P<speaker>[^\s:]+):(?P<remainder>.+)')
@@ -106,10 +113,10 @@ class Line(object):
       m = direction_regex.match(element)
       newline = None
       if m:
-				pass
+        pass
       else:
-				# this just a spoken line
-				newline = Line(line, index, speaker=speaker)
+        # this just a spoken line
+        newline = Line(line, index, speaker=speaker, asset_dir=asset_dir)
       
       if newline:
         index = index + 1

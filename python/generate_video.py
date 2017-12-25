@@ -155,7 +155,7 @@ def generate_video():
   for i in range(len(script._lines)):
     print("line: " + str(i) + " at frame: " + str(end_frame))
     line = script._lines[i]
-      end_frame = line.animate(animation_controller, current_frame=end_frame):
+    end_frame = line.animate(scene, animation_controller, current_frame=end_frame)
 
   # for debugging just add an enter action at frame zero
   exit_action = add_action("anime.girl.head", "exit", end_frame)
