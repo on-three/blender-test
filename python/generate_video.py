@@ -93,7 +93,7 @@ animation_controller._on_video = on_video_frame
 
 def on_before_render(scene):
   global animation_controller
-  scene = bpy.data.scenes['scene']
+  scene = bpy.context.scene
   frame = scene.frame_current
   animation_controller.update(frame)
    
@@ -147,8 +147,10 @@ def generate_video():
   script = Script(script_filepath, asset_dir=args.assetdir)
 
   # for debugging just add an enter action at frame zero
-  enter_action = add_action("anime.girl.head", "enter", 0)
-  end_frame = enter_action.frame_end
+  do_dummy_actions = False
+  if do_dummy_actions:
+    enter_action = add_action("anime.girl.head", "enter", 0)
+    end_frame = enter_action.frame_end
 
   # add audio for all lines in script
   #for line in script:
@@ -157,9 +159,9 @@ def generate_video():
     line = script._lines[i]
     end_frame = line.animate(scene, animation_controller, current_frame=end_frame)
 
-  # for debugging just add an enter action at frame zero
-  exit_action = add_action("anime.girl.head", "exit", end_frame)
-  end_frame = exit_action.frame_end
+  if do_dummy_actions:
+    exit_action = add_action("anime.girl.head", "exit", end_frame)
+    end_frame = exit_action.frame_end
 
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(on_before_render)

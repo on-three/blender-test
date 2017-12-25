@@ -67,15 +67,15 @@ class Line(object):
     phoneme_file = self._phoneme_file
     if not os.path.isfile(phoneme_file):
       raise IOError("Coudld not find requried phoneme file: %s" % phoneme_file)
-    if self._audio_file:
-      animation_controller.add_utterance(self._speaker, current_frame, phoneme_file)
-      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, current_frame)
+    
+    animation_controller.add_utterance(self._speaker, current_frame, phoneme_file)
+    soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, current_frame)
       # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
-      print(str(soundstrip.frame_final_end))
-      duration = soundstrip.frame_final_end
-      print(duration)
+    print(str(soundstrip.frame_final_end))
+    duration = soundstrip.frame_final_end
+    print(duration)
 
-      end_frame = soundstrip.frame_final_end #frame_duration
+    end_frame = soundstrip.frame_final_end #frame_duration
     return end_frame
  
   @staticmethod
