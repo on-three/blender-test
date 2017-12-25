@@ -93,7 +93,7 @@ animation_controller._on_video = on_video_frame
 
 def on_before_render(scene):
   global animation_controller
-  scene = bpy.data.scenes['Scene']
+  scene = bpy.data.scenes['scene']
   frame = scene.frame_current
   animation_controller.update(frame)
    
@@ -153,34 +153,9 @@ def generate_video():
   # add audio for all lines in script
   #for line in script:
   for i in range(len(script._lines)):
-    print("line: " + str(i) + " end_frame: " + str(end_frame))
+    print("line: " + str(i) + " at frame: " + str(end_frame))
     line = script._lines[i]
-    if line._video:
-      # Add video to timeline, get length
-      start_frame = end_frame
-      print("LINE: video {video} at frame {start}".format(video=line._video, start=start_frame)) 
-      vid = animation_controller.add_video(line._speaker, line._video, start_frame, 30)
-      end_frame = vid._end_frame
-      #add_video_billboard('./video/tits.avi', 'TITS', loc=[0,0,0], scale=0.015, frame=0)
-      continue
-
-    audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
-    if line._audio_file:
-      audio_file = line._audio_file
-    phoneme_file = audio_file + '.phonemes.out.txt'
-    if line._phoneme_file:
-      phoneme_file = line._phoneme_file
-      animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
-      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
-      # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
-      print(str(soundstrip.frame_final_end))
-      duration = soundstrip.frame_final_end
-      print(duration)
-
-      end_frame = soundstrip.frame_final_end #frame_duration
-      with open("tmp.file.txt", "w") as f:
-        f.write("After adding utterance video end-frame is at {d}".format(d=str(end_frame)))
-        f.close()
+      end_frame = line.animate(animation_controller, current_frame=end_frame):
 
   # for debugging just add an enter action at frame zero
   exit_action = add_action("anime.girl.head", "exit", end_frame)
