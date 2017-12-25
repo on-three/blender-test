@@ -31,7 +31,7 @@ gen_phoneme_file () {
   #ADDITIONAL_ARGS="-time yes -beam 1e-10 -pbeam 1e-10 -lw 0.5"
   ADDITIONAL_ARGS="-time yes -dither no -beam 1e-10 -pbeam 1e-10 -lw 0.5"
 
-  OUTFILE=${INFILE}.phonemes.out.txt
+  OUTFILE=${INFILE}.phonemes.txt
 
   $SPHINX -infile $RAW_AUDIO -hmm $HMM_PATH -allphone $ALLPHONE_FILE $ADDITIONAL_ARGS > $OUTFILE
 

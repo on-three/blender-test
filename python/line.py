@@ -18,9 +18,9 @@ class Line(object):
 
   def gen_filename(self, path, extension):
     if self._speaker:
-      return path + '/' + str(self._index) + '.' + self._speaker + extension
+      return path + '/' + str(self._index) + '.' +  self._speaker + extension
     else:
-      return path + '/' + str(self._index) + '.' +  extension
+      return path + '/' + str(self._index) + extension
 	
   def gen_audio_file(self, out_dir='./tmp'):
     outfile = self._audio_file or self.gen_filename(out_dir, '.mp3')
@@ -44,11 +44,11 @@ class Line(object):
     print('Wrote file %s' % (outfile))
     
   def gen_phoneme_file(self, out_dir='./tmp'):
-    outfile = self._phoneme_file or self.gen_filename(out_dir, 'phonemes.txt') 
+    outfile = self._phoneme_file or self.gen_filename(out_dir, '.phonemes.txt') 
     self._phoneme_file = outfile
-    infile = self._phoneme_file or self.gen_filename(out_dir, '.mp3')
+    infile = self._audio_file or self.gen_filename(out_dir, '.mp3')
     cmd = 'tools/phonemes.sh {infile}'.format(infile=infile)
-    print("Generating phonemes file for input audio file " + filepath)
+    print("Generating phonemes file for input audio file " + infile)
     os.system(cmd)
 
   def animate(self, animation_controller, current_frame):
@@ -76,7 +76,7 @@ class Line(object):
 		# eliminate comments
     line = line.split('#')[0].strip()
     if not len(line):
-			return
+			return index
 
 		# first remove speaker at start of line if there is one
 		# There may or may not be a speaker for a line
@@ -93,7 +93,7 @@ class Line(object):
       if speaker:
         # TODO; speaker with no line means insert x second pause
         pass
-      return
+      return index
 		
 		# chew through the rest of the line, removing text and
 		# stage directions sequentially
