@@ -282,8 +282,13 @@ def add_action(obj_name, action_name, start_frame):
     pass #return
 
   # get/create the animation track (we'll add the action above as a strip to this track)
-  a = obj.animation_data.action
-  track = obj.animation_data.nla_tracks.new()
+  #a = obj.animation_data.action
+  tracks = obj.animation_data.nla_tracks
+  track = None
+  if len(tracks) == 0:
+    track = obj.animation_data.nla_tracks.new()
+  else:
+    track = obj.animation_data.nla_tracks[0]
   s = track.strips.new(action.name, start_frame, action);
   #bpy.ops.nla.actionclip_add(s)
 
