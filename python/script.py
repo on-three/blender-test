@@ -72,8 +72,8 @@ def main():
     return -1
 
   script = Script(infile, asset_dir=args.outdir)
-  for line in script:
-    print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
+  for index, line in enumerate(script):
+    print("Line: " + str(index) + " speaker: " + str(line))
 
   #if args.posts:
   #  get_posts(script, out_dir=args.outdir)

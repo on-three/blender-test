@@ -2,12 +2,17 @@ import os.path
 import re
 import pipes
 
+from audio import Audio
 from action import Action
 from video import Video
 
 class Line(object):
   # infer phoneme files via filename
   PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
+
+  directions = {
+    'AUDIO' : Audio.generator,
+  }
 
   def gen_filename(self, path, extension):
     if self._speaker:
@@ -24,6 +29,10 @@ class Line(object):
     self._index = index
     self._audio_file = self.gen_filename(asset_dir, '.mp3')
     self._phoneme_file = self._audio_file + '.phonemes.txt'
+
+  def __str__(self):
+    s = "Line: " + str(self._speaker) + " : " + self._text
+    return s
 
 	
   def gen_audio_file(self, out_dir='./tmp'):
@@ -104,23 +113,30 @@ class Line(object):
 		
 		# chew through the rest of the line, removing text and
 		# stage directions sequentially
-    r = re.compile( r'\([^:\w]:[^)]\)' )
-    direction_regex = re.compile(r'\((?P<direction>[^\w:]+):(?P<args>[\)]?)\)')
+    #r = re.compile( r'\([^:\w]+:[^)]?\)' )
+    #r = re.compile( r'(\([^)]+\))' )
+    r = re.compile( r'(\([^\W:]+:[^)]+\))' )
+    direction_regex = re.compile( r'(\((?P<direction>[^\W:]+):(?P<args>[^)]+)\))' )
     elements = re.split(r, line)
-    print(elements)
+    print("split line: " + str(elements))
     for e in range(len(elements)):
       element = elements[e]
+      print("element: " + element)
       m = direction_regex.match(element)
       newline = None
       if m:
-        pass
+        direction = m.groupdict()['direction']
+        args = m.groupdict()['args'].strip()
+        print("Detected an action..." + element + " direction: " + direction + " args: " + args)
+        if direction in Line.directions:
+          newline = Line.directions[direction](speaker, args, asset_dir=asset_dir)
       else:
         # this just a spoken line
-        newline = Line(line, index, speaker=speaker, asset_dir=asset_dir)
+        newline = Line(element, index, speaker=speaker, asset_dir=asset_dir)
       
       if newline:
         index = index + 1
         script.add_line(newline)
-      return index
+    return index
 
 				
