@@ -268,7 +268,28 @@ def add_action(obj_name, action_name, start_frame):
   #        selected_strips = []
 
   #bject.animation_data_create()
-  #object.animation_data.action = bpy.data.actions.get("anotheraction")
+  #object.animation_data.action = bpy.data.actions.get(action_name)
+  
+  # get the object
+  obj = bpy.data.objects.get(obj_name)
+  if not obj:
+    print("Could not find object named: " + obj_name + " in scene.")
+    pass #return
+  
+  # get our action
+  action = bpy.data.actions.get(action_name)
+  if not action:
+    pass #return
+
+  # get/create the animation track (we'll add the action above as a strip to this track)
+  a = obj.animation_data.action
+  track = obj.animation_data.nla_tracks.new()
+  s = track.strips.new(action.name, start_frame, action);
+  #bpy.ops.nla.actionclip_add(s)
+
+  # clients can get the end frame from the returned strip
+  return s
+
 
   #obj = bpy.data.objects[obj_name]
   #if not obj:
@@ -280,5 +301,5 @@ def add_action(obj_name, action_name, start_frame):
   #    track = obj.animation_data.nla_tracks.new()
   #    track.strips.new(action.name, action.frame_range[0], action)
   #    obj.animation_data.action = None
-  pass
+  #pass
 

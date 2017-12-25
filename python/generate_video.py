@@ -36,6 +36,7 @@ from blender_utils import add_background
 from blender_utils import add_billboard
 from blender_utils import add_video_billboard
 from blender_utils import hide_obj
+from blender_utils import add_action
 
 animation_controller = AnimationController()
 
@@ -145,6 +146,10 @@ def generate_video():
   print("opening file: " + script_filepath)
   script = Script(script_filepath, asset_dir=args.assetdir)
 
+  # for debugging just add an enter action at frame zero
+  enter_action = add_action("anime.girl.head", "enter", 0)
+  end_frame = enter_action.frame_end
+
   # add audio for all lines in script
   #for line in script:
   for i in range(len(script._lines)):
@@ -176,6 +181,10 @@ def generate_video():
       with open("tmp.file.txt", "w") as f:
         f.write("After adding utterance video end-frame is at {d}".format(d=str(end_frame)))
         f.close()
+
+  # for debugging just add an enter action at frame zero
+  exit_action = add_action("anime.girl.head", "exit", end_frame)
+  end_frame = exit_action.frame_end
 
   # run a handler on each frame
   bpy.app.handlers.frame_change_pre.append(on_before_render)
