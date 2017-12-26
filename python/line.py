@@ -133,7 +133,7 @@ class Line(object):
       if m:
         direction = m.groupdict()['direction']
         args = m.groupdict()['args'].strip()
-        print("Detected an action..." + element + " direction: " + direction + " args: " + args)
+        print("Detected an direction. speaker: " + str(speaker) + " direction: " + direction + " args: " + args)
         if direction in Line.directions:
           newline = Line.directions[direction](speaker, args, asset_dir=asset_dir)
       else:

@@ -113,6 +113,7 @@ def generate_video():
   parser.add_argument('infile', help='Input script txt file.')
   parser.add_argument('-o', '--out', help='Output file path')
   parser.add_argument('-a', '--assetdir', help='Generated asset resource dir')
+  parser.add_argument('-b', '--blendfile', help='Initial loaded asset .blend file', default='./models/default.blend')
   parser.add_argument('-t', '--test', action='store_true', default=False, help='Test run only generating single output image')
   parser.add_argument('-n', '--norender', action='store_true', default=False, help='Turn off all rendering.')
   parser.add_argument('-s', '--save', help='Save a blend file of configuration.')
@@ -129,8 +130,8 @@ def generate_video():
     blendfile_to_save = args.save
 
   # Load our default scene and assets.
-  # TODO: specify this by argument
-  bpy.ops.wm.open_mainfile(filepath="./models/default.blend")
+  #bpy.ops.wm.open_mainfile(filepath="./models/default.blend")
+  bpy.ops.wm.open_mainfile(filepath=args.blendfile)
 
 
   context = bpy.context
