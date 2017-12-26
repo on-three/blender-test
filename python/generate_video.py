@@ -36,21 +36,18 @@ from blender_utils import add_background
 from blender_utils import add_billboard
 from blender_utils import add_video_billboard
 from blender_utils import hide_obj
+from blender_utils import add_action
 
 animation_controller = AnimationController()
 
 def set_mouth_img(obj, _pos):
-  # position 0 mps to silence (SIL) so we can hide the "mouth"
-  #if pos == 0:
-  #  obj.hide = True
-  #  return
-
-  #obj.hide = False
-
-  # phonemee sounds are one based, but indexes into image are zro based
-  #pos = _pos -1
-  pos = _pos
-  
+  """ Mouth positions arem apped 0->9 as described in phonemes.py
+  We set the "position" by remapping UV coordinates for an object
+  called "mouth" somwhere in the scene.
+  The layout of the mouths texture a simple 4x4 layout with
+  zero position in the UL corner.
+  """
+  pos = _pos  
   # U,V coordinates are reversed in Y direction
   # and pos 0 serves as both "A" and "SIL"
   x1 = (pos % 4) * 0.25
@@ -67,34 +64,38 @@ def set_mouth_img(obj, _pos):
     for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
       uv_coords = obj.data.uv_layers.active.data[loop_idx].uv
       print("face idx: %i, vert idx: %i, uvs: %f, %f" % (face.index, vert_idx, uv_coords.x, uv_coords.y))
-      #ob.data.uv_layers.active.data[loop_index].uv = (0.5, 0.5)
 
 def on_utterance_frame(frame, s):
+  """
+  callback invoked once per frame by animation system to set a
+  mouth object to the proper texture as provided by phonemes in
+  the animation.
+  """
   obj = get_object_by_name('mouth')
   set_mouth_img(obj, s.sound())
-  #set_mouth_img(obj, frame % 9)
 
 def on_video_frame(video, frame):
-  #obj_name = "SPEAKER"
-  #filename = "./video/tits.avi"
+  """
+  callback invoked once per frame (before render) to create/destroy video objects
+  as they are played by the animation.
+  Yes I'd like to simply hide them for greater control but blender sux, so...
+  """
   if frame == video._start_frame:
-    bb = add_video_billboard(video._filename, video._name, loc=[-7,3.5,0], scale=0.02, frame=frame)
+    bb = add_video_billboard(video._filename, video._name, loc=[-0.26,0.15,1.0], scale=0.15, frame=frame)
   elif frame == video._end_frame:
     bpy.data.objects[video._name].select = True
     bpy.ops.object.delete()
     
 
+# set callbacks in the animation controller
+animation_controller._on_utterance = on_utterance_frame
+animation_controller._on_video = on_video_frame
 
-def update_phoneme(scene):
+def on_before_render(scene):
   global animation_controller
-  #animation_controller.set_on_frame_handler(on_animation_frame)
-  animation_controller._on_utterance = on_utterance_frame
-  animation_controller._on_video = on_video_frame
-  scene = bpy.data.scenes['Scene']
+  scene = bpy.context.scene
   frame = scene.frame_current
   animation_controller.update(frame)
-  #obj = returnObjectByName('mouth')
-  #set_mouth_img(obj, frame % 9)
    
 
 def generate_video():
@@ -127,88 +128,48 @@ def generate_video():
   if args.save:
     blendfile_to_save = args.save
 
+  # Load our default scene and assets.
+  # TODO: specify this by argument
+  bpy.ops.wm.open_mainfile(filepath="./models/default.blend")
+
+
   context = bpy.context
   scene = bpy.context.scene
   world = bpy.context.scene.world
   if not scene.sequence_editor:
     scene.sequence_editor_create()
 
-  # clear everything and set up our scene
-  delete_scene_objects()
-  set_render_settings()
-
-  
-  # Environment lighting
-  wset = world.light_settings
-  wset.use_environment_light = True
-  wset.use_ambient_occlusion = True
-  wset.ao_blend_type = 'MULTIPLY'
-  wset.ao_factor = 0.8
-  wset.gather_method = 'APPROXIMATE'
-
+  # end_frame tracks the length in total frames of generated video
   end_frame = 0
   
   # load a script passed as argument
   print("opening file: " + script_filepath)
   script = Script(script_filepath, asset_dir=args.assetdir)
 
+  # for debugging just add an enter action at frame zero
+  do_dummy_actions = False
+  if do_dummy_actions:
+    enter_action = add_action("anime.girl.head", "enter", 0)
+    end_frame = enter_action.frame_end
+
   # add audio for all lines in script
   #for line in script:
   for i in range(len(script._lines)):
-    print("line: " + str(i) + " end_frame: " + str(end_frame))
+    print("line: " + str(i) + " at frame: " + str(end_frame))
     line = script._lines[i]
-    if line._video:
-      # Add video to timeline, get length
-      start_frame = end_frame
-      print("LINE: video {video} at frame {start}".format(video=line._video, start=start_frame)) 
-      vid = animation_controller.add_video(line._speaker, line._video, start_frame, 30)
-      end_frame = vid._end_frame
-      #add_video_billboard('./video/tits.avi', 'TITS', loc=[0,0,0], scale=0.015, frame=0)
-      continue
+    end_frame = line.animate(scene, animation_controller, current_frame=end_frame)
 
-    audio_file = './tmp/' + str(line._index) + '.' + line._speaker + '.mp3'
-    if line._audio_file:
-      audio_file = line._audio_file
-    phoneme_file = audio_file + '.phonemes.out.txt'
-    if line._phoneme_file:
-      phoneme_file = line._phoneme_file
-      animation_controller.add_utterance(line._speaker, end_frame, phoneme_file)
-      soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, end_frame)
-      end_frame = soundstrip.frame_final_end #frame_duration
-
-
-  filepath = "models/person.blend"
+  if do_dummy_actions:
+    exit_action = add_action("anime.girl.head", "exit", end_frame)
+    end_frame = exit_action.frame_end
 
   # run a handler on each frame
-  bpy.app.handlers.frame_change_pre.append(update_phoneme)
+  bpy.app.handlers.frame_change_pre.append(on_before_render)
 
-  # add a mouth and a girl anime head
-  img = add_billboard('img/anime-mouths.png', 'mouth', loc=[1.5,-5.5,0], scale=0.0015)
-  add_billboard('img/anime-girl-head.png', 'background', loc=[0,0,0], scale=0.004)
-  
-  # and a background
-  add_billboard('img/classroom.jpg', 'background', loc=[0,0,0], scale=0.015)
- 
-  # add a camera
-  bpy.ops.object.camera_add(view_align=False,
-    location=[0, 0, 30],
-    rotation=[0, 0, 0])
-  camera = context.object
-  bpy.context.scene.camera = camera
-  look_at(camera, [0,0,0]) 
-  camera.name = 'Camera'
-
-  # set up render settings
-  for scene in bpy.data.scenes:
-    scene.render.image_settings.file_format = 'H264'
-    scene.render.ffmpeg.format = 'QUICKTIME'
-    scene.render.image_settings.color_mode = 'RGB'
-    scene.render.ffmpeg.audio_codec = 'AAC'
-    scene.render.ffmpeg.audio_bitrate = 128
-    scene.render.resolution_percentage = 100
-    bpy.context.scene.frame_start = 0
-    bpy.context.scene.frame_end = end_frame #frame_num
-    bpy.context.scene.render.filepath = out_filepath
+  # TODO: ability to cap frame limit for test renders
+  #end_frame = 48
+  bpy.context.scene.frame_end = end_frame
+  bpy.context.scene.render.filepath = out_filepath
  
   if blendfile_to_save:
     print("Saving script configuration as blend file: " + blendfile_to_save)

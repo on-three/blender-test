@@ -12,128 +12,25 @@ import re
 import pipes
 import ntpath
 
-class Line(object):
-  # infer phoneme files via filename
-  PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
-
-  def __init__(self, index=0):
-    self._speaker = None
-    self._text = None
-    self._index = index
-    self._audio_file = None
-    self._phoneme_file = None
-    self._post = None
-    self._image = None
-    self._voice = None
-    self._video = None
-    
-  def gen_filename(self, path, extension):
-    if self._post:
-      return path +'/' + self._post + extension
-    elif self._video:
-      vid = ntpath.basename(self._video)
-      return path + '/' + vid + extension
-    elif self._speaker:
-      return path + '/' + str(self._index) + '.' + self._speaker + extension
-    else:
-      return path + '/' + str(self._index) + extension
-
-  @staticmethod
-  def parse(index, line, tmp_dir='./tmp'):
-    # parse indivdual lines of dialog for speaker and text
-    r = re.compile(r'^(?P<speaker>[^\s:]+):( )?(?P<text>.+)')
-    # parse any string for "stage directions"
-    pd = re.compile(r'\((?P<desc>[^\s():]+):(?P<direction>[^()]+)?\)')
-
-    new_line = Line(index=index)
-    valid_line = False
-
-    # remove "stage directions" before processing the line properly
-    for d in pd.finditer(line):
-      valid_line = True
-      desc = d.group('desc')
-      direction = None
-      if 'direction' in d.groupdict():
-        direction = d.group('direction').strip()
-      print("Direction: {desc} --> {direction}".format(desc=desc, direction=direction))
-
-      if desc == 'AUDIO':
-        # an audio file contains the lines spoken at this point
-        new_line._audio_file = str(direction)
-        new_line._phoneme_file = new_line._audio_file + Line.PHONEME_FILE_SUFFIX
-      elif desc == 'POST':
-        # a 4chin or archive post contains the lines spoken at this point
-        # we require a 'THREAD' direction governing the script in general
-        # for this to really work, but we still can create the line
-        new_line._post = str(direction)
-      elif desc == 'VOICE':
-        new_line._voice = direction
-      elif desc == 'VIDEO':
-        new_line._video = direction
-
-    line = re.sub('\([^\s():]+[^()]+\)', '', line)
-
-    matches = r.match(line)
-    if matches:
-      valid_line = True
-      speaker = matches.group('speaker')
-      text = matches.group('text')
-      print("SPEAKER: " + speaker + ' TEXT: ' + text)
-      new_line._speaker = speaker
-      new_line._text = text
-      
-    # see if the line text has any parenthetical directions embedded        
-    if valid_line:
-      # estimate what our audio file and phoneme files will be
-      if not new_line._audio_file:
-        new_line._audio_file = new_line.gen_filename(tmp_dir, '.mp3')
-      if not new_line._phoneme_file:
-        new_line._phoneme_file = new_line.gen_filename(tmp_dir, '.mp3.phonemes.out.txt')
-
-
-      return new_line
-    return None
-         
+from line import Line
 
 class Script(object):
   def __init__(self, filepath, asset_dir='./tmp'):
     self._filepath = filepath
     self._lines = []
-    self._thread = None
-
-    # parse any string for "stage directions"
-    pd = re.compile(r'^\((?P<desc>[^\s():]+):(?P<direction>[^()]+)?\)')
-
+    i = 1
     with open(self._filepath) as f:
-      i = 1 # don't enumerate so we can increment by SPEAKER
       for line in f:
-        # eliminate comments
-        line = line.split('#')[0].strip()
-       
-        d = pd.match(line)
-        if d:
-          desc = d.group('desc')
-          direction = None
-          if 'direction' in d.groupdict():
-            direction = d.group('direction').strip()
-          print("Single Direction: {desc} --> {direction}".format(desc=desc, direction=direction))
-
-          if desc == 'THREAD':
-            # an audio file contains the lines spoken at this point
-            self._thread = str(direction)
-        
-          continue
-
-        l = Line.parse(i, line, asset_dir)
-        if l:
-          self._lines.append(l)
-          i = i + 1
-        self._current = 0
-
+        i = Line.parse(self, i, line, asset_dir)
+      self._current = 0
+      
+  def add_line(self, line):
+    self._lines.append(line)
+  
   def __iter__(self):
     self._current = 0
     return self
-
+    
   def next(self): # Python 3: def __next__(self)
     if self._current >= len(self._lines):
       raise StopIteration
@@ -142,95 +39,13 @@ class Script(object):
     return self._lines[self._current-1]
 
 
-def do_tts(script, out_dir='./tmp/',
-            tool='gtts-cli',
-            args='{tool} -o {outfile} {text}',
-            gen_phonemes=False):
-  """
-  Generate audio off a script
-  ARGS:
-  script: parsed script object (see above)
-  tool: path to tts tool to use (defaults to gtts-cli)
+def do_tts(script, out_dir):
+	for line in script:
+		line.gen_audio_file(out_dir)
 
-  """
-  print("Generating tts audio files off input script")
-  for line in script:
-    outfile = line._audio_file or line.gen_filename(out_dir, '.mp3')
-    
-    # the audio file for this line might already exist
-    if os.path.isfile(outfile):
-      print("Audio file {file} already exists. Not generating.".format(file=line._audio_file))
-      continue
-    text = ''
-    if line._post:
-      # TODO: remove quotes, urls etc from post text
-      infile = line.gen_filename(out_dir, '.txt')
-      s = 'gtts-cli -o {outfile} -f {file}'.format(outfile=outfile, file=infile)
-      print('Making system call: "%s"' % (s))
-      os.system(s)
-      # it's possible that for posts, there might be no text 
-      # if we didn't generate a file, fail
-
-    elif line._speaker:
-      text = pipes.quote(line._text)
-      s = args.format(tool=tool, outfile=outfile, text=text)
-      print('Making system call: "%s"' % (s))
-      os.system(s)
-      # if we didn't generate a file, fail
-      if not os.path.isfile(outfile):
-        raise IOError("Could not generate file: %s" % (outfile))
-      print('Wrote file %s' % (outfile))
-
-def do_phonemes(script, out_dir='./tmp/'):
-  """
-  Generate phoneme files off input audio files
-  ARGS:
-    filepath: path to input audio file
-    out_path: output directory for generated phoeneme file.
-  """
-  for line in script:
-    filepath = line._audio_file or line.gen_filename(out_dir, '.mp3') 
-    cmd = 'tools/phonemes.sh {filepath}'.format(filepath=filepath)
-    print("Generating phonemes file for input audio file " + filepath)
-    os.system(cmd)
-
-
-def get_posts(script, out_dir='./tmp/'):
-  # script has to specify a THREAD to do anything
-  if not script._thread:
-    print("Script did not specify a THREAD for post sources.")
-    return
-
-  thread = script._thread
-  for line in script:
-    if line._post:
-      # as it's expensive to generate post images, first check if it's already there
-      image_filename = line.gen_filename(out_dir, '.png')
-      text_filename = line.gen_filename(out_dir, '.txt')
-      if(os.path.isfile(image_filename) and os.path.isfile(text_filename)):
-        print("skipping {image} and {txt} because they already exist.".format(image=image_filename, txt=text_filename))
-        continue
-      cmd = 'phantomjs tools/get_post.js \'{thread}\' \'{post}\' {out_dir}'.format(thread=thread, post=line._post, out_dir=out_dir)
-      print("Running os.system command: " + cmd)
-      os.system(cmd)
-      # TODO: check files now exist or throw
-
-def get_video_info(script, out_dir='./tmp/'):
-  """
-  Generate video (and audio) info files off input video files
-  ARGS:
-    filepath: path to input audio file
-    out_path: output directory for generated phoeneme file.
-  """
-  for line in script:
-    filename = line._video or line._audio_file
-    if filename:
-      print("**** " + filename)
-      outfile = line.gen_filename(out_dir, '.runtime.txt')
-      cmd = 'ffprobe -i "{filename}" -show_entries format=duration -v quiet -of csv="p=0" > {outfile}'.format(filename=filename, outfile=outfile)
-      print("Generating video length file for input media file " + filename)
-      print(cmd)
-      os.system(cmd)
+def do_phonemes(script, out_dir):
+	for line in script:
+		line.gen_phoneme_file(out_dir)
 
 
 """
@@ -257,11 +72,11 @@ def main():
     return -1
 
   script = Script(infile, asset_dir=args.outdir)
-  for line in script:
-    print("Line: " + str(line._index) + " speaker: " + line._speaker + " text: " + line._text)
+  for index, line in enumerate(script):
+    print("Line: " + str(index) + " speaker: " + str(line))
 
-  if args.posts:
-    get_posts(script, out_dir=args.outdir)
+  #if args.posts:
+  #  get_posts(script, out_dir=args.outdir)
 
   if args.tts:
     do_tts(script, out_dir=args.outdir)
@@ -269,14 +84,9 @@ def main():
   if args.phonemes:
     do_phonemes(script, out_dir=args.outdir)
 
-  if args.videos:
-    get_video_info(script, out_dir=args.outdir)
+  #if args.videos:
+  #  get_video_info(script, out_dir=args.outdir)
 
 if __name__ == '__main__':
   main()
-
-
-
-
-
 

@@ -1,1 +1,6 @@
-SPEAKER: Testing, one, two, three, four, five.
+anime.girl.head: (ACTION: enter)
+anime.girl.head: Esto el fin el grande padre.
+#anime.girl.head: (AUDIO: ./audio/test.mp3)
+anime.girl.head: Ultimate masenko.
+anime.girl.head: Yo te detendre.
+anime.girl.head: (ACTION: exit)

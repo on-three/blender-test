@@ -3,6 +3,7 @@
 
 import re
 from phonemes import Tokenizer as PhonemeTokenizer
+from blender_utils import add_action as bpy_add_action
 import bpy
 
 class Video(object):
@@ -31,9 +32,7 @@ class Video(object):
     self._end_frame = self._start_frame + self._length
     self._movie = img
     self._texture = ctex
-
-
-
+    
   def get_frame(self, frame):
     if frame >= self._start_frame and frame <= self._end_frame:
       return self;
@@ -55,12 +54,16 @@ class AnimationController(object):
     return s
 
   def add_video(self, speaker, video, start_frame, fps=30):
-   print("Going to play video {video} at frame {start_frame}".format(video=video, start_frame=start_frame))
-   vid = Video(video, speaker, start_frame, fps)
-   self._videos.append(vid)
-   return vid
+    print("Going to play video {video} at frame {start_frame}".format(video=video, start_frame=start_frame))
+    vid = Video(video, speaker, start_frame, fps)
+    self._videos.append(vid)
+    return vid
 
+  def add_action(self, obj_name, action_name, start_frame):
+    s = bpy_add_action(obj_name, action_name, start_frame)
+    return s
 
+ 
   def set_on_utterance(self, handler):
     self._on_utterance = handler
 
