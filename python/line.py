@@ -11,7 +11,8 @@ class Line(object):
   PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
 
   directions = {
-    'AUDIO' : Audio.generator,
+    Audio.DIRECTION : Audio.generator,
+    Video.DIRECTION : Video.generator,
   }
 
   def gen_filename(self, path, extension):
@@ -121,6 +122,10 @@ class Line(object):
     print("split line: " + str(elements))
     for e in range(len(elements)):
       element = elements[e]
+      element = element.strip()
+      if not len(element):
+        continue
+
       print("element: " + element)
       m = direction_regex.match(element)
       newline = None
@@ -133,7 +138,7 @@ class Line(object):
       else:
         # this just a spoken line
         newline = Line(element, index, speaker=speaker, asset_dir=asset_dir)
-      
+
       if newline:
         index = index + 1
         script.add_line(newline)

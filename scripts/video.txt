@@ -1,5 +1,5 @@
 # example of script line that defers to a pre-existing (not TTS generated) audio file
 # These files should not have background noise, and be for a single speaker's utterance
 SPEAKER: And now, a short video about tits.
-SCREEN: (VIDEO: ./video/tits.avi)
+SCREEN: (VIDEO: ./video/freiza.mp4)
 SPEAKER: Thank you for viewing. Good night.

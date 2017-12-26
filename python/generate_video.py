@@ -81,7 +81,7 @@ def on_video_frame(video, frame):
   Yes I'd like to simply hide them for greater control but blender sux, so...
   """
   if frame == video._start_frame:
-    bb = add_video_billboard(video._filename, video._name, loc=[-0.3,0.16,1.0], scale=0.5, frame=frame)
+    bb = add_video_billboard(video._filename, video._name, loc=[-0.26,0.15,1.0], scale=0.15, frame=frame)
   elif frame == video._end_frame:
     bpy.data.objects[video._name].select = True
     bpy.ops.object.delete()
