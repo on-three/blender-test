@@ -13,6 +13,7 @@ class Line(object):
   directions = {
     Audio.DIRECTION : Audio.generator,
     Video.DIRECTION : Video.generator,
+    Action.DIRECTION : Action.generator,
   }
 
   def gen_filename(self, path, extension):
