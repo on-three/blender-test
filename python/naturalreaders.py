@@ -22,16 +22,6 @@ def download_file(url, filename):
   return local_filename
 
 
-# Mike voice requires this URL. how to handle?
-# https://api.naturalreaders.com/v0/tts/?src=pw&r=1&s=1&t=testing%2C%20one%2C%20two%20three
-# Rod voice:
-# https://api.naturalreaders.com/v0/tts/?src=pw&r=41&s=1&t=testing%2C%20one%2C%20two%20three
-# Rachel;
-# https://api.naturalreaders.com/v0/tts/?src=pw&r=32&s=1&t=testing%2C%20one%2C%20two%20three
-# Peter
-# https://api.naturalreaders.com/v0/tts/?src=pw&r=31&s=1&t=testing%2C%20one%2C%20two%20three
-# voices and aliases
-
 class Voice(object):
   def __init__(self, name, id, api):
     self._name = name
