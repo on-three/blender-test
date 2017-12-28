@@ -4,19 +4,19 @@
   Currently relies on a static API key so I don't know how well this will work.
 
 """
+import argparse
 import urllib
 import requests
 
 #wget "https://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&r=0&s=1&t=I%20am%20el%20grande%20padre." -O el.grande.padre.mp3
 
 
-apikey="b98x9xlfs54ws4k0wc0o8g4gwc0w8ss"
-src="pw"
-reader="0"
-speed="1"
+#src="pw"
+#reader="0"
+#speed="1"
 
-text="I am el grande padre."
-text=urllib.quote(text, safe='')
+#text="I am el grande padre."
+#text=urllib.quote(text, safe='')
 
 
 
@@ -34,7 +34,27 @@ def download_file(url, filename):
   return local_filename
 
 
-url = "https://api.naturalreaders.com/v4/tts/macspeak?apikey={apikey}&src={src}&r={reader}&s={speed}&t={text}".format(apikey=apikey, src=src, reader=reader, speed=speed, text=text)
+def do_tts(text, outfile, voice="0", speed="1"):
+  apikey="b98x9xlfs54ws4k0wc0o8g4gwc0w8ss"
+  src="pw"
+  text = urllib.quote(text, safe='')
+  url = "https://api.naturalreaders.com/v4/tts/macspeak?apikey={apikey}&src={src}&r={reader}&s={speed}&t={text}".format(apikey=apikey, src=src, reader=voice, speed=speed, text=text)
+  download_file(url, outfile)
 
-download_file(url, "output.mp3")
+def main():
+  parser = argparse.ArgumentParser(description='Scrape naturalreaders for TTS mp3 files.')
+  parser.add_argument('text', action="store")
+  parser.add_argument('-v', '--voice', type=str, default="0")
+  parser.add_argument('-s','--speed', type=str, default="1")
+  parser.add_argument('-o', '--outfile', type=str, default='output.mp3')
+  args = parser.parse_args()
+
+  print("Doing TTS for input string: '{text}'".format(text=args.text))
+  print("Generating output file: {outfile}".format(outfile=args.outfile))
+  
+  do_tts(args.text, args.outfile, voice=args.voice, speed=args.speed)
+  
+
+if __name__ == '__main__':
+  main()
 
