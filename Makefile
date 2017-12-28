@@ -26,7 +26,13 @@ ifeq ($(NORENDER), 1)
   SCRIPT_ARGS += -s $(OUT_DIR)/$(SCRIPT).blend
 endif
 
-
+# this sucks but i don't have anything better yet
+ifeq ($(SCRIPT), el.grande.padre.1)
+SCRIPT_ARGS += --blendfile ./models/dbs.blend
+endif
+ifeq ($(SCRIPT), trump)
+SCRIPT_ARGS += --blendfile ./models/trump.blend
+endif
 
 # tools
 BLENDER ?= blender
