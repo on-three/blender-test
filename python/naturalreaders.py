@@ -8,18 +8,6 @@ import argparse
 import urllib
 import requests
 
-#wget "https://api.naturalreaders.com/v4/tts/macspeak?apikey=b98x9xlfs54ws4k0wc0o8g4gwc0w8ss&src=pw&r=0&s=1&t=I%20am%20el%20grande%20padre." -O el.grande.padre.mp3
-
-
-#src="pw"
-#reader="0"
-#speed="1"
-
-#text="I am el grande padre."
-#text=urllib.quote(text, safe='')
-
-
-
 # after https://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
 def download_file(url, filename):
   #local_filename = url.split('/')[-1]
@@ -34,17 +22,57 @@ def download_file(url, filename):
   return local_filename
 
 
-def do_tts(text, outfile, voice="0", speed="1"):
+# Mike voice requires this URL. how to handle?
+# https://api.naturalreaders.com/v0/tts/?src=pw&r=1&s=1&t=testing%2C%20one%2C%20two%20three
+# Rod voice:
+# https://api.naturalreaders.com/v0/tts/?src=pw&r=41&s=1&t=testing%2C%20one%2C%20two%20three
+# Rachel;
+# https://api.naturalreaders.com/v0/tts/?src=pw&r=32&s=1&t=testing%2C%20one%2C%20two%20three
+# Peter
+# https://api.naturalreaders.com/v0/tts/?src=pw&r=31&s=1&t=testing%2C%20one%2C%20two%20three
+# voices and aliases
+
+class Voice(object):
+  def __init__(self, name, id, api):
+    self._name = name
+    self._id = id
+    self._api = api
+
+
+voices = {
+  "sharon" : Voice("sharon", "42", "4"), # eng (US)
+  "amanda" : Voice("amanda", "1", "4"), # eng (US)
+  "tracy" : Voice("tracy", "37", "4"), # eng (US)
+  "ryan" : Voice("ryan", "33", "4"), # eng (US)
+  "tim" : Voice("tim", "0", "4"), # eng (US) --> El Grande Padre
+  "susan" : Voice("susan", "2", "4"), # eng (US)
+  "mike" : Voice("mike", "1", "0"), # eng (US)
+  "rod" : Voice("rod", "41", "0"), # eng (US)
+  "rachel" : Voice("rachel", "32", "0"), # eng (UK)
+  "peter" : Voice("peter", "31", "0"),
+  "graham" : Voice("graham", "25", "0"),
+  "selene" : Voice("selene", "4", "4"),
+  "darren" : Voice("darren", "3", "4"), # eng (UK) --> Goku
+}
+
+
+def do_tts(text, outfile, voice="darren", speed="1"):
+  global voices
+  voice_data = voices[voice]
+  reader = voice_data._id
   apikey="b98x9xlfs54ws4k0wc0o8g4gwc0w8ss"
   src="pw"
   text = urllib.quote(text, safe='')
-  url = "https://api.naturalreaders.com/v4/tts/macspeak?apikey={apikey}&src={src}&r={reader}&s={speed}&t={text}".format(apikey=apikey, src=src, reader=voice, speed=speed, text=text)
+ 
+  url = "https://api.naturalreaders.com/v4/tts/macspeak?apikey={apikey}&src={src}&r={reader}&s={speed}&t={text}".format(apikey=apikey, src=src, reader=reader, speed=speed, text=text)
+  if voice_data._api == "0":
+    url = "https://api.naturalreaders.com/v0/tts/?src={pw}&r={reader}&s={speed}&t={text}".format(src=src, reader=reader, speed=speed, text=text) 
   download_file(url, outfile)
 
 def main():
   parser = argparse.ArgumentParser(description='Scrape naturalreaders for TTS mp3 files.')
   parser.add_argument('text', action="store")
-  parser.add_argument('-v', '--voice', type=str, default="0")
+  parser.add_argument('-v', '--voice', type=str, default="darren")
   parser.add_argument('-s','--speed', type=str, default="1")
   parser.add_argument('-o', '--outfile', type=str, default='output.mp3')
   args = parser.parse_args()
