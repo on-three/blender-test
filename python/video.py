@@ -25,7 +25,7 @@ class Video(object):
     pass
 
   @staticmethod
-  def generator(speaker, args, asset_dir='./tmp'):
+  def generator(script, speaker, args, asset_dir='./tmp'):
     """Static constructor we can store in a dictionary
     """
     return Video(filename=args, asset_dir=asset_dir)

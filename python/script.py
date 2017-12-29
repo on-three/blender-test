@@ -18,6 +18,7 @@ class Script(object):
   def __init__(self, filepath, asset_dir='./tmp'):
     self._filepath = filepath
     self._lines = []
+    self._speaker_map = {}
     i = 1
     with open(self._filepath) as f:
       for line in f:

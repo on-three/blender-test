@@ -5,6 +5,13 @@ import pipes
 from audio import Audio
 from action import Action
 from video import Video
+from voice import Voice
+from naturalreaders import do_tts
+
+class Speaker(object):
+  def __init__(self, name):
+    self._name = name
+    self._voice = None
 
 class Line(object):
   # infer phoneme files via filename
@@ -14,11 +21,12 @@ class Line(object):
     Audio.DIRECTION : Audio.generator,
     Video.DIRECTION : Video.generator,
     Action.DIRECTION : Action.generator,
+    Voice.DIRECTION : Voice.generator,
   }
 
   def gen_filename(self, path, extension):
     if self._speaker:
-      return path + '/' + str(self._index) + '.' +  self._speaker + extension
+      return path + '/' + str(self._index) + '.' +  self._speaker._name + extension
     else:
       return path + '/' + str(self._index) + extension
   
@@ -31,9 +39,19 @@ class Line(object):
     self._index = index
     self._audio_file = self.gen_filename(asset_dir, '.mp3')
     self._phoneme_file = self._audio_file + '.phonemes.txt'
+    self._voice = None
+
+  def set_voice(self, voice):
+    self._voice = voice
+
+  def get_voice(self):
+    return self._voice
 
   def __str__(self):
-    s = "Line: " + str(self._speaker) + " : " + self._text
+    speaker = "NONE"
+    if self._speaker:
+      speaker = self._speaker._name
+    s = "Line: " + speaker + " : " + self._text
     return s
 
 	
@@ -45,13 +63,17 @@ class Line(object):
     if os.path.isfile(outfile):
       print("Audio file {file} already exists. Not generating.".format(file=self._audio_file))
       return
-      
-    tool = 'gtts-cli'
-    # TODO: use specific voice per speaker
+    # if we've set a voice, try to fetch tts from the web naturalvoices
     text = pipes.quote(self._text)
-    cmd = '{tool} -o {outfile} {text}'.format(tool=tool, outfile=outfile, text=text)
-    print('Making system call: "%s"' % (cmd))
-    os.system(cmd)
+    if self._speaker and self._speaker._voice:
+      voice = self._speaker._voice
+      do_tts(text, outfile, voice=self._speaker._voice._name, speed="1")
+    else:
+      tool = 'gtts-cli'
+      cmd = '{tool} -o {outfile} {text}'.format(tool=tool, outfile=outfile, text=text)
+      print('Making system call: "%s"' % (cmd))
+      os.system(cmd)
+
     # if we didn't generate a file, fail
     if not os.path.isfile(outfile):
     	raise IOError("Could not generate file: %s" % (outfile))
@@ -104,7 +126,13 @@ class Line(object):
     #speaker_regex = re.compile(r'^(?P<speaker>[^:\w]+):(?<remainder>.+)$')
     speaker_match = speaker_regex.match(line)
     if speaker_match:
-      speaker = speaker_match.groupdict()['speaker']
+      speaker_name = speaker_match.groupdict()['speaker']
+      if not speaker_name in script._speaker_map:
+        speaker = Speaker(speaker_name)
+        script._speaker_map[speaker_name] = speaker
+      else:
+        speaker = script._speaker_map[speaker_name]
+
       line = speaker_match.groupdict()['remainder'].strip()
 		
     if not len(line):
@@ -135,7 +163,7 @@ class Line(object):
         args = m.groupdict()['args'].strip()
         print("Detected an direction. speaker: " + str(speaker) + " direction: " + direction + " args: " + args)
         if direction in Line.directions:
-          newline = Line.directions[direction](speaker, args, asset_dir=asset_dir)
+          newline = Line.directions[direction](script, speaker, args, asset_dir=asset_dir)
       else:
         # this just a spoken line
         newline = Line(element, index, speaker=speaker, asset_dir=asset_dir)

@@ -8,6 +8,7 @@ import argparse
 import urllib
 import requests
 
+
 # after https://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
 def download_file(url, filename):
   #local_filename = url.split('/')[-1]
@@ -36,7 +37,7 @@ voices = {
   "ryan" : Voice("ryan", "33", "4"), # eng (US)
   "tim" : Voice("tim", "0", "4"), # eng (US) --> El Grande Padre
   "susan" : Voice("susan", "2", "4"), # eng (US)
-  "mike" : Voice("mike", "1", "0"), # eng (US)
+  "mike" : Voice("mike", "1", "0"), # eng (US) --> Moonman
   "rod" : Voice("rod", "41", "0"), # eng (US)
   "rachel" : Voice("rachel", "32", "0"), # eng (UK)
   "peter" : Voice("peter", "31", "0"),
@@ -46,7 +47,7 @@ voices = {
 }
 
 
-def do_tts(text, outfile, voice="darren", speed="1"):
+def do_tts(text, outfile, voice="darren", speed="-4"):
   global voices
   voice_data = voices[voice]
   reader = voice_data._id
@@ -56,14 +57,14 @@ def do_tts(text, outfile, voice="darren", speed="1"):
  
   url = "https://api.naturalreaders.com/v4/tts/macspeak?apikey={apikey}&src={src}&r={reader}&s={speed}&t={text}".format(apikey=apikey, src=src, reader=reader, speed=speed, text=text)
   if voice_data._api == "0":
-    url = "https://api.naturalreaders.com/v0/tts/?src={pw}&r={reader}&s={speed}&t={text}".format(src=src, reader=reader, speed=speed, text=text) 
+    url = "https://api.naturalreaders.com/v0/tts/?src={src}&r={reader}&s={speed}&t={text}".format(src=src, reader=reader, speed=speed, text=text) 
   download_file(url, outfile)
 
 def main():
   parser = argparse.ArgumentParser(description='Scrape naturalreaders for TTS mp3 files.')
   parser.add_argument('text', action="store")
   parser.add_argument('-v', '--voice', type=str, default="darren")
-  parser.add_argument('-s','--speed', type=str, default="1")
+  parser.add_argument('-s','--speed', type=str, default="-4")
   parser.add_argument('-o', '--outfile', type=str, default='output.mp3')
   args = parser.parse_args()
 

@@ -25,7 +25,7 @@ class Action(object):
     pass
 
   @staticmethod
-  def generator(speaker, args, asset_dir='./tmp'):
+  def generator(script, speaker, args, asset_dir='./tmp'):
     """Static constructor we can store in a dictionary
     """
     return Action(name=args, speaker=speaker, asset_dir=asset_dir)
