@@ -38,7 +38,7 @@ F,V
 import re
 
 class Phoneme(object):
-  SIL = 0 # same as m.b.p
+  SIL = 0
   A = 1
   I = 1
   O = 2
@@ -47,15 +47,15 @@ class Phoneme(object):
   R = 4
   T = 5
   S = 5
-  L = 6
-  N = 6
-  U = 7
+  L = 5
+  N = 5
+  U = 1
   Q = 7
-  M = 8
-  B = 8
-  P = 8
-  F = 9
-  V = 9
+  M = 7
+  B = 7
+  P = 7
+  F = 8
+  V = 8
   def __init__(self, sound, start_frame, end_frame, text="", speaker=None):
     self._sound = sound
     self._start_frame = start_frame
@@ -95,7 +95,7 @@ DEFAULT_PHONEME_MAP = {
   'K'   : Phoneme.T,
   'ER'  : Phoneme.R,
   'Y'   : Phoneme.E,
-  'UW'  : Phoneme.U,
+  'UW'  : Phoneme.O,
   'N'   : Phoneme.N,
   'L'   : Phoneme.L,
   'N'   : Phoneme.N,
