@@ -124,7 +124,7 @@ DEFAULT_PHONEME_MAP = {
 }
 
 class Tokenizer(object):
-  def __init__(self, filename, fps=24, speaker=None, start_frame=0, text="", min_threshold=0.035, phoneme_map=DEFAULT_PHONEME_MAP):
+  def __init__(self, filename, fps=24, speaker=None, start_frame=0, text="", min_threshold=0.0035, phoneme_map=DEFAULT_PHONEME_MAP):
     self._filename = filename
     self._start_frame = start_frame
     self._min_threshold = min_threshold
