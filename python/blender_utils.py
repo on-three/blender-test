@@ -177,8 +177,6 @@ def add_video_texture(obj, video_path, texture_name):
   mtex.transparency_method = 'Z_TRANSPARENCY'
   #mtex.use_transparency = True
   mtex.alpha = 0.0
-  
-  
   slot = mtex.texture_slots.add()
   slot.texture = ctex
   slot.texture_coords = 'UV'
@@ -262,29 +260,19 @@ def add_action(obj_name, action_name, start_frame):
   Method returns an object describing the added action
   ESPECIALLY the ending frame for the strip added to the NLA editor
   """
-  #try:
-  #    selected_strips = [strip for strip in bpy.context.object.animation_data.nla_tracks.active.strips if strip.select]
-  #    except AttributeError:
-  #        selected_strips = []
-
-  #bject.animation_data_create()
-  #object.animation_data.action = bpy.data.actions.get(action_name)
-  
   # get the object
   obj = bpy.data.objects.get(obj_name)
   if not obj:
     print("Could not find object named: " + obj_name + " in scene.")
     raise IOError("could not find object %s in scene." % obj_name)
-    pass #return
+    return
   
   # get our action
   action = bpy.data.actions.get(action_name)
   if not action:
     raise IOError("Could not find action %s in scene." % action_name)
-    pass #return
+    return
 
-  # get/create the animation track (we'll add the action above as a strip to this track)
-  #a = obj.animation_data.action
   if not obj.animation_data:
     obj.animation_data_create()
   tracks = obj.animation_data.nla_tracks
@@ -294,21 +282,33 @@ def add_action(obj_name, action_name, start_frame):
   else:
     track = obj.animation_data.nla_tracks[0]
   s = track.strips.new(action.name, start_frame, action);
-  #bpy.ops.nla.actionclip_add(s)
 
   # clients can get the end frame from the returned strip
   return s
 
+def create_update_subtitle(text, text_obj_name="subtitle"):
+  
+  text_obj = bpy.data.objects.get(text_obj_name)
+  if not text_obj:
+    #bpy.ops.object.text_add(location=(0, 0, 0), rotation=(45,0,0))
+    bpy.ops.object.text_add(location=(0, 0, 3.0), rotation=(0,0,0))
+    text_obj = bpy.context.object
+  text_obj.name = text_obj_name
+  #text_obj.rotation_euler.x = radians(90) # Rotate text by 90 degrees along X axis
+  text_obj.data.extrude = 0.05 # Add depth to the text
+  text_obj.data.bevel_depth = 0.01 # Add a nice bevel effect to smooth the text's edges
+  text_obj.data.body = text
 
-  #obj = bpy.data.objects[obj_name]
-  #if not obj:
-  #  return None
-
-  #if obj.animation_data is not None:
-  #  action = obj.animation_data.action
-  #  if action is not None:
-  #    track = obj.animation_data.nla_tracks.new()
-  #    track.strips.new(action.name, action.frame_range[0], action)
-  #    obj.animation_data.action = None
-  #pass
+  #'Emission material'
+  tex_obj_mat_name = text_obj_name + "_material"
+  material = bpy.data.materials.get(tex_obj_mat_name)
+  if not material:
+    #material = bpy.data.materials[tex_ob_mat_name]
+    material = bpy.data.materials.new(tex_obj_mat_name)
+    material.diffuse_color = (1, 1, 1)
+    #mtex.transparency_method = 'Z_TRANSPARENCY'
+    #mtex.use_transparency = True
+    #mtex.alpha = 0.0
+    #material = bpy.data.materials.new(name=tex_obj_mat_name, (1,1,1), 1.8)
+  text_obj.active_material = material
 

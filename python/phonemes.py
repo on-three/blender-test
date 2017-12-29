@@ -56,14 +56,18 @@ class Phoneme(object):
   P = 8
   F = 9
   V = 9
-  def __init__(self, sound, start_frame, end_frame):
+  def __init__(self, sound, start_frame, end_frame, text=""):
     self._sound = sound
     self._start_frame = start_frame
     self._end_frame = end_frame
+    self._text = text
     print("created phoneme: " + str(self._sound) + "  start: " + str(self._start_frame) + " end: " + str(self._end_frame))
 
   def sound(self):
     return self._sound
+
+  def text(self):
+    return self._text
 
 #SIL K F ER Y UW N SIL
 #SIL IH F AE NG D IH EY D EH AA F UH EY DH AA NG HH AH SIL
@@ -119,7 +123,7 @@ DEFAULT_PHONEME_MAP = {
 }
 
 class Tokenizer(object):
-  def __init__(self, filename, fps=24, speaker=None, start_frame=0, min_threshold=0.035, phoneme_map=DEFAULT_PHONEME_MAP):
+  def __init__(self, filename, fps=24, speaker=None, start_frame=0, text="", min_threshold=0.035, phoneme_map=DEFAULT_PHONEME_MAP):
     self._filename = filename
     self._start_frame = start_frame
     self._min_threshold = min_threshold
@@ -127,6 +131,7 @@ class Tokenizer(object):
     self._fps = fps
     self._phonemes = []
     self._speaker = speaker
+    self._text = text
 
     # SIL 0.000 0.030 1.000000
     r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
@@ -150,7 +155,7 @@ class Tokenizer(object):
               continue
             self._phonemes.append(Phoneme(self._phoneme_map[p],
               int(s*self._fps) + self._start_frame,
-              int(e*self._fps)+self._start_frame))
+              int(e*self._fps)+self._start_frame, self._text))
     except:
       print("Exctption thrown while parsing phoneme file.")
   def start_frame(self):

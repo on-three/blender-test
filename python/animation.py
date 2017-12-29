@@ -46,8 +46,8 @@ class AnimationController(object):
     self._utterances = []
     self._videos = []
 
-  def add_utterance(self, speaker, start_frame, phoneme_file, fps=24):
-    s = PhonemeTokenizer(phoneme_file, start_frame=start_frame, speaker=speaker)
+  def add_utterance(self, speaker, start_frame, text, phoneme_file, fps=24):
+    s = PhonemeTokenizer(phoneme_file, start_frame=start_frame, speaker=speaker, text=text)
     if s:
       self._utterances.append(s)
     print("number of utterances now: " + str(len(self._utterances)))

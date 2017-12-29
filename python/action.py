@@ -35,10 +35,13 @@ class Action(object):
     """
     Animate this video, adding it to the scene for X frames
     """
-    print("ACTION: speaker: " + self._speaker + " name: " + self._name + " start frame: " + str(self._start_frame));
+    print("ACTION: speaker: " + str(self._speaker) + " name: " + self._name + " start frame: " + str(self._start_frame));
     # Add video to timeline, get length
     self._start_frame = self._start_frame + current_frame
-    exit_action = animation_controller.add_action(self._speaker, self._name, self._start_frame)
+    target = None
+    if self._speaker:
+      target = self._speaker._name
+    exit_action = animation_controller.add_action(target, self._name, self._start_frame)
     print("----> " + str(exit_action.frame_end))
     self._end_frame = exit_action.frame_end
     print("----> " + str(exit_action.frame_end))
