@@ -37,6 +37,7 @@ from blender_utils import add_billboard
 from blender_utils import add_video_billboard
 from blender_utils import hide_obj
 from blender_utils import add_action
+from blender_utils import create_update_subtitle
 
 animation_controller = AnimationController()
 
@@ -163,6 +164,10 @@ def generate_video():
   if do_dummy_actions:
     enter_action = add_action("anime.girl.head", "enter", 0)
     end_frame = enter_action.frame_end
+
+  do_dummy_sub = True
+  if do_dummy_sub:
+    create_update_subtitle("testing, one, two, three...")
 
   # add audio for all lines in script
   #for line in script:

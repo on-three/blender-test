@@ -291,12 +291,12 @@ def create_update_subtitle(text, text_obj_name="subtitle"):
   text_obj = bpy.data.objects.get(text_obj_name)
   if not text_obj:
     #bpy.ops.object.text_add(location=(0, 0, 0), rotation=(45,0,0))
-    bpy.ops.object.text_add(location=(0, 0, 3.0), rotation=(0,0,0))
+    bpy.ops.object.text_add(location=(0, 0, 1.0), rotation=(0,0,0))
     text_obj = bpy.context.object
   text_obj.name = text_obj_name
   #text_obj.rotation_euler.x = radians(90) # Rotate text by 90 degrees along X axis
-  text_obj.data.extrude = 0.05 # Add depth to the text
-  text_obj.data.bevel_depth = 0.01 # Add a nice bevel effect to smooth the text's edges
+  #text_obj.data.extrude = 0.05 # Add depth to the text
+  #text_obj.data.bevel_depth = 0.01 # Add a nice bevel effect to smooth the text's edges
   text_obj.data.body = text
 
   #'Emission material'
@@ -306,6 +306,7 @@ def create_update_subtitle(text, text_obj_name="subtitle"):
     #material = bpy.data.materials[tex_ob_mat_name]
     material = bpy.data.materials.new(tex_obj_mat_name)
     material.diffuse_color = (1, 1, 1)
+    material.use_shadeless = True
     #mtex.transparency_method = 'Z_TRANSPARENCY'
     #mtex.use_transparency = True
     #mtex.alpha = 0.0
