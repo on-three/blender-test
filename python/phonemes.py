@@ -137,6 +137,7 @@ class Tokenizer(object):
     r = re.compile(r'^(?P<phoneme>\S{1,3}) (?P<start>\d+\.\d+) (?P<end>\d+\.\d+) (?P<prob>\d+\.\d+)', re.IGNORECASE)
     #r = re.compile(r'^(?P<phoneme>\W{1,3}) ', re.IGNORECASE)
     print("Opening phoneme file at: " + filename)
+    end = 0
     try:
       with open(self._filename) as f:
         for line in f:
@@ -146,6 +147,8 @@ class Tokenizer(object):
             p = matches.group('phoneme')
             s = float(matches.group('start'))
             e = float(matches.group('end'))
+            start = int(s*self._fps) + self._start_frame
+            end = int(e*self._fps) + self._start_frame
             # attampt to remove 'noise' by only taking phonemes longer than 0.3 seconds
             # and if there is a previous phoneme, we extend its time to cover this one
             print("Phoneme: " + p + ' start:' + str(s) + " end: " + str(e))
@@ -154,8 +157,10 @@ class Tokenizer(object):
                 self._phonemes[-1]._end_frame = int(e*self._fps)
               continue
             self._phonemes.append(Phoneme(self._phoneme_map[p],
-              int(s*self._fps) + self._start_frame,
-              int(e*self._fps)+self._start_frame, self._text))
+              start, end, self._text))
+      # append a SIL phoneme at the end for a single frame
+      self._end_frame = end +1
+      self._phonemes.append(Phoneme(Phoneme.SIL, end, self._end_frame))
     except:
       print("Exctption thrown while parsing phoneme file.")
   def start_frame(self):

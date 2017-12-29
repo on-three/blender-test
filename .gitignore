@@ -3,3 +3,5 @@ out
 tmp
 *.swp
 __pycache__
+*.pyc
+*.blend1
