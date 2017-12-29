@@ -56,11 +56,12 @@ class Phoneme(object):
   P = 8
   F = 9
   V = 9
-  def __init__(self, sound, start_frame, end_frame, text=""):
+  def __init__(self, sound, start_frame, end_frame, text="", speaker=None):
     self._sound = sound
     self._start_frame = start_frame
     self._end_frame = end_frame
     self._text = text
+    self._speaker = speaker
     print("created phoneme: " + str(self._sound) + "  start: " + str(self._start_frame) + " end: " + str(self._end_frame))
 
   def sound(self):
@@ -157,10 +158,10 @@ class Tokenizer(object):
                 self._phonemes[-1]._end_frame = int(e*self._fps)
               continue
             self._phonemes.append(Phoneme(self._phoneme_map[p],
-              start, end, self._text))
+              start, end, self._text, speaker=self._speaker))
       # append a SIL phoneme at the end for a single frame
       self._end_frame = end +1
-      self._phonemes.append(Phoneme(Phoneme.SIL, end, self._end_frame))
+      self._phonemes.append(Phoneme(Phoneme.SIL, end, self._end_frame, self._text, speaker=self._speaker))
     except:
       print("Exctption thrown while parsing phoneme file.")
   def start_frame(self):

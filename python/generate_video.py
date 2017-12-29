@@ -70,9 +70,20 @@ def on_utterance_frame(frame, s):
   callback invoked once per frame by animation system to set a
   mouth object to the proper texture as provided by phonemes in
   the animation.
+  s: Phoneme class instance
   """
-  obj = get_object_by_name('mouth')
-  set_mouth_img(obj, s.sound())
+  # we need to look up the actual mouth object in the scene we'll manipulate
+  mouth = None
+  if s._speaker:
+    mouth = get_object_by_name(s._speaker._name +".mouth")
+  
+  # fallback if we don't find the above
+  if not mouth:
+    mouth = get_object_by_name('mouth')
+  
+  if mouth:
+    # TODO: fail if no mouth available?
+    set_mouth_img(mouth, s.sound())
 
 def on_video_frame(video, frame):
   """
