@@ -6,6 +6,7 @@ from audio import Audio
 from action import Action
 from video import Video
 from voice import Voice
+from pause import Pause
 from naturalreaders import do_tts
 
 class Speaker(object):
@@ -18,12 +19,13 @@ class Speaker(object):
 class Line(object):
   # infer phoneme files via filename
   PHONEME_FILE_SUFFIX = '.phonemes.out.txt'
-
+  PADDING_SECONDS = 0.5 # pad utterances by n frames at the start
   directions = {
     Audio.DIRECTION : Audio.generator,
     Video.DIRECTION : Video.generator,
     Action.DIRECTION : Action.generator,
     Voice.DIRECTION : Voice.generator,
+    Pause.DIRECTION : Pause.generator,
   }
 
   def gen_filename(self, path, extension):
@@ -90,7 +92,7 @@ class Line(object):
     print("Generating phonemes file for input audio file " + infile)
     os.system(cmd)
 
-  def animate(self, scene, animation_controller, current_frame):
+  def animate(self, scene, animation_controller, current_frame, fps=30):
     """Handle a spoken line
     """
     end_frame = current_frame
@@ -102,9 +104,10 @@ class Line(object):
     phoneme_file = self._phoneme_file
     if not os.path.isfile(phoneme_file):
       raise IOError("Coudld not find requried phoneme file: %s" % phoneme_file)
-    
-    animation_controller.add_utterance(self._speaker, current_frame, self._text, phoneme_file)
-    soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, current_frame)
+   
+    start_frame = current_frame + Line.PADDING_SECONDS * fps
+    animation_controller.add_utterance(self._speaker, start_frame, self._text, phoneme_file)
+    soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, start_frame)
       # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1
     print(str(soundstrip.frame_final_end))
     duration = soundstrip.frame_final_end
@@ -124,7 +127,7 @@ class Line(object):
     # There may or may not be a speaker for a line
     speaker = None
 
-    speaker_regex = re.compile(r'^(?P<speaker>[^\s:]+):(?P<remainder>.+)')
+    speaker_regex = re.compile(r'^(?P<speaker>[^()\s:]+):(?P<remainder>.+)')
     #speaker_regex = re.compile(r'^(?P<speaker>[^:\w]+):(?<remainder>.+)$')
     speaker_match = speaker_regex.match(line)
     if speaker_match:

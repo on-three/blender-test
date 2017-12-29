@@ -31,7 +31,7 @@ class Action(object):
     return Action(name=args, speaker=speaker, asset_dir=asset_dir)
  
   #end_frame = line.animate(scene, animation_controller, current_frame=end_frame)
-  def animate(self, scene, animation_controller, current_frame):
+  def animate(self, scene, animation_controller, current_frame, fps=30):
     """
     Animate this video, adding it to the scene for X frames
     """

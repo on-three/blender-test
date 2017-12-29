@@ -158,7 +158,9 @@ def generate_video():
   for i in range(len(script._lines)):
     print("line: " + str(i) + " at frame: " + str(end_frame))
     line = script._lines[i]
-    end_frame = line.animate(scene, animation_controller, current_frame=end_frame)
+    #TODO: fetch current .blend file settings FPS
+    fps = 30
+    end_frame = line.animate(scene, animation_controller, current_frame=end_frame, fps=fps)
 
   if do_dummy_actions:
     exit_action = add_action("anime.girl.head", "exit", end_frame)

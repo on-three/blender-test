@@ -31,7 +31,7 @@ class Voice(object):
   def gen_phoneme_file(self, out_dir='./tmp'):
     pass
 
-  def animate(self, scene, animation_controller, current_frame):
+  def animate(self, scene, animation_controller, current_frame, fps=30):
     """
     """
     end_frame = current_frame
