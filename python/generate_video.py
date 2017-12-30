@@ -38,7 +38,8 @@ from blender_utils import add_video_billboard
 from blender_utils import hide_obj
 from blender_utils import add_action
 
-animation_controller = AnimationController()
+
+animation_controller = None
 
 def set_mouth_img(obj, _pos):
   """ Mouth positions arem apped 0->9 as described in phonemes.py
@@ -98,10 +99,6 @@ def on_video_frame(video, frame):
     bpy.ops.object.delete()
     
 
-# set callbacks in the animation controller
-animation_controller._on_utterance = on_utterance_frame
-animation_controller._on_video = on_video_frame
-
 def on_before_render(scene):
   global animation_controller
   scene = bpy.context.scene
@@ -139,6 +136,14 @@ def generate_video():
   blendfile_to_save = None
   if args.save:
     blendfile_to_save = args.save
+
+  # init the animation controller which will write an .srt subfile
+  srt_filename = out_filepath + '.srt'
+  animation_controller = AnimationController(srt_outfile=srt_filename)
+  # set callbacks in the animation controller
+  animation_controller._on_utterance = on_utterance_frame
+  animation_controller._on_video = on_video_frame
+
 
   # Load our default scene and assets.
   #bpy.ops.wm.open_mainfile(filepath="./models/default.blend")
@@ -188,6 +193,9 @@ def generate_video():
   if blendfile_to_save:
     print("Saving script configuration as blend file: " + blendfile_to_save)
     bpy.ops.wm.save_as_mainfile(filepath=blendfile_to_save)
+
+  # allow animation controller to do final actions
+  animation_controller.finalize()
 
   # render video
   if not no_render:

@@ -6,6 +6,17 @@ from phonemes import Tokenizer as PhonemeTokenizer
 from blender_utils import add_action as bpy_add_action
 import bpy
 
+def srt_time_format(time_seconds):
+  seconds = time_seconds
+  hours = int(seconds/3600)
+  seconds = seconds - (hours * 3600)
+  minutes = int(seconds/60)
+  seconds = seconds - (minutes * 60)
+  fractional = time_seconds - int(time_seconds)
+  #00:02:17,440 --> 00:02:20,375
+  s = "%02d:%02d:%02d,%03d" % (hours, minutes, int(seconds), int(fractional*100))
+  return s
+
 class Video(object):
   def __init__(self, filename, name, start_frame, fps):
     self._filename = filename
@@ -38,20 +49,67 @@ class Video(object):
       return self;
     return None
 
+class SRTSubtitleWriter(object):
+  def __init__(self, outfile, max_sub_time_sec=3.5, fps=30):
+    self._outfile = outfile
+    self._max_sub_time_sec = max_sub_time_sec
+    self._fps = fps
+    self._f = open(self._outfile, "w")
+    self._last_utterance_text = None
+    self._last_utterance_frame = 0
+    self._counter = 1
+
+  def finalize(self):
+    if self._last_utterance_text:
+      last_frame = int((self._last_utterance_frame / self._fps + self._max_sub_time_sec)*self._fps)
+      self.write_line(self._last_utterance_text, last_frame)
+    self._f.close()
+
+  def write_line(self, text, current_frame):
+    if self._last_utterance_text:
+      start_time = self._last_utterance_frame / self._fps
+      end_time = current_frame / self._fps
+      if end_time - start_time > self._max_sub_time_sec:
+        end_time = start_time + self._max_sub_time_sec
+      self._f.write("%d\n" % (self._counter))
+      self._f.write("%s --> %s\n" % (srt_time_format(start_time), srt_time_format(end_time)))
+      self._f.write("%s\n" % (self._last_utterance_text))
+      self._f.write("\n")
+      self._f.flush()
+      self._counter = self._counter + 1
+
+    self._last_utterance_frame = current_frame
+    self._last_utterance_text = text
+    
+  def update(self, frame):
+    # has enough time elapsed to write the last sub to the file?
+    pass
+
 
 class AnimationController(object):
-  def __init__(self, on_utterance=None, on_video=None):
+  def __init__(self, on_utterance=None, on_video=None, srt_outfile=None):
     self._on_utterance = on_utterance
     self._on_video = on_video
     self._utterances = []
     self._videos = []
+    self._srt = None
+    if srt_outfile:
+      self._srt = SRTSubtitleWriter(srt_outfile)
 
-  def add_utterance(self, speaker, start_frame, text, phoneme_file, fps=24):
+  def add_utterance(self, speaker, start_frame, text, phoneme_file, fps=30):
     s = PhonemeTokenizer(phoneme_file, start_frame=start_frame, speaker=speaker, text=text)
     if s:
       self._utterances.append(s)
     print("number of utterances now: " + str(len(self._utterances)))
+
+    if self._srt:
+      self._srt.write_line(text, start_frame);
+
     return s
+
+  def finalize(self):
+    if self._srt:
+      self._srt.finalize()
 
   def add_video(self, speaker, video, start_frame, fps=30):
     print("Going to play video {video} at frame {start_frame}".format(video=video, start_frame=start_frame))
