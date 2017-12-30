@@ -51,8 +51,14 @@ DISPLAY := chromium-browser
 #	touch $@
 
 $(TARGET): $(MOV_OUT) $(SUBS_FILE)
-	#$(FFMPEG) -y -i $< -i $(SUBS_FILE) $@
-	$(FFMPEG) -y -i $< $@
+	# we hardcode the subs file onto the webm (but not MOV)
+	$(FFMPEG) -i $(MOV_OUT) -vf subtitles=$(SUBS_FILE) $@
+
+$(SUBS_FILE):
+	# if our subs file wasn't generated during movie rendering this creates an empty default
+	echo "1" > $(SUBS_FILE)
+	echo "00:00:00,000 --> 00:00:01,00" >> $(SUBS_FILE)
+	echo "" >> $(SUBS_FILE)
 
 $(MOV_OUT): $(BLENDER_SCRIPT) $(TMP_DIR)
 	mkdir -p $(@D)
