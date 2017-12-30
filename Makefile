@@ -12,6 +12,7 @@ BLENDER_SCRIPT ?= $(PYTHON_DIR)/generate_video.py
 TARGET_EXT ?= .webm
 TARGET ?= $(OUT_DIR)/$(SCRIPT)$(TARGET_EXT)
 MOV_OUT ?= $(TARGET:$(TARGET_EXT)=.mov)
+SUBS_FILE = $(MOV_OUT).srt
 
 TMP_DIR := $(TMP_ROOT)/$(SCRIPT)
 
@@ -50,7 +51,7 @@ DISPLAY := chromium-browser
 #	touch $@
 
 $(TARGET): $(MOV_OUT)
-	$(FFMPEG) -y -i $< $@
+	$(FFMPEG) -y -i $< -i $(SUBS_FILE) $@
 
 $(MOV_OUT): $(BLENDER_SCRIPT) $(TMP_DIR)
 	mkdir -p $(@D)
