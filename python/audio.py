@@ -58,7 +58,8 @@ class Audio(object):
       raise IOError("Coudld not find requried phoneme file: %s" % phoneme_file)
     
     if phoneme_file:
-      animation_controller.add_utterance(self._speaker, current_frame, phoneme_file)
+      animation_controller.add_utterance(self._speaker, current_frame, "", phoneme_file)
+      #def add_utterance(self, speaker, start_frame, text, phoneme_file, fps=30):
     
     soundstrip = scene.sequence_editor.sequences.new_sound(audio_file, audio_file, 3, current_frame)
       # as per https://blender.stackexchange.com/questions/47131/retrieving-d-imagessome-image-frame-duration-always-returns-1

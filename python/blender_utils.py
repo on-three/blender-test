@@ -11,7 +11,7 @@ import sys, os
 from math import pi
 from mathutils import Vector
 
-def set_render_settings(w=1920, h=1080, scale=100, fps=24):
+def set_render_settings(w=1920, h=1080, scale=100, fps=30):
   """
   Set blender render settings
   Args:
@@ -24,7 +24,7 @@ def set_render_settings(w=1920, h=1080, scale=100, fps=24):
   render.resolution_x = w
   render.resolution_y = h
   render.resolution_percentage = scale
-  render.fps = 24
+  render.fps = fps
   render.use_raytrace = False
   #render.use_color_management = True
   render.use_sss = False

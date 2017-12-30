@@ -50,8 +50,9 @@ DISPLAY := chromium-browser
 #	./scripts/phonemes.sh $(@D)
 #	touch $@
 
-$(TARGET): $(MOV_OUT)
-	$(FFMPEG) -y -i $< -i $(SUBS_FILE) $@
+$(TARGET): $(MOV_OUT) $(SUBS_FILE)
+	#$(FFMPEG) -y -i $< -i $(SUBS_FILE) $@
+	$(FFMPEG) -y -i $< $@
 
 $(MOV_OUT): $(BLENDER_SCRIPT) $(TMP_DIR)
 	mkdir -p $(@D)
