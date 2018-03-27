@@ -35,10 +35,12 @@ POST_TXT=${WORKING_DIR}/${POST_NUM}.txt
 POST_AUDIO=${WORKING_DIR}/${POST_NUM}.mp3
 POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
 POST_WEBM=${POST_NUM}.webm
+IMG_SIZE=1024x768
 
 # generate an image and textfile off the post
 if [ ! -f $POST_TXT ] || [ ! -f $POST_IMG ]; then
   phantomjs tools/get_post.js "$POST_URL" "$WORKING_DIR"
+  convert $POST_IMG -gravity center -background black -resize $IMG_SIZE -extent $IMG_SIZE $POST_IMG
 fi
 
 # fail if we don't have the resultant .png and .txt files
@@ -63,7 +65,7 @@ echo Generating video from image $POST_IMG
 echo *** generating post video from txt and img***
 echo $POST_AUDIO
 echo $POST_IMG
-echo $POST_AUDIO
+echo $POST_VIDEO
 
 ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
 
