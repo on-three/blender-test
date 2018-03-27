@@ -45,10 +45,12 @@ for POST_NUM in $(cat < ${POST_LIST}); do
   POST_TXT=${WORKING_DIR}/${POST_NUM}.txt
   POST_AUDIO=${WORKING_DIR}/${POST_NUM}.mp3
   POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
+  IMG_SIZE=1024x768
 
   # generate an image and textfile off the post
   if [ ! -f $POST_IMG ] || [ ! -f $POST_TXT ]; then
     phantomjs tools/get_post.js "$THREAD_URL" "$POST_NUM" "$WORKING_DIR"
+    convert $POST_IMG -gravity center -background black -resize $IMG_SIZE -extent $IMG_SIZE $POST_IMG
   fi
 
   # fail if we don't have the resultant .png and .txt files
