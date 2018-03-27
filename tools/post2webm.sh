@@ -37,11 +37,13 @@ POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
 POST_WEBM=${POST_NUM}.webm
 
 # generate an image and textfile off the post
-phantomjs tools/get_post.js "$POST_URL" "$WORKING_DIR"
+if [ ! -f $POST_TXT ] || [ ! -f $POST_IMG ]; then
+  phantomjs tools/get_post.js "$POST_URL" "$WORKING_DIR"
+fi
 
 # fail if we don't have the resultant .png and .txt files
 if [ ! -f $POST_IMG ]; then
-  echo "Post file does not exist. FAILING"
+  echo "Post img file does not exist. FAILING"
   exit -1
 fi
 if [ ! -f $POST_TXT ]; then
@@ -50,13 +52,18 @@ if [ ! -f $POST_TXT ]; then
 fi
 
 # generate TTS audio
-gtts-cli -f ${POST_TXT} -o ${POST_AUDIO}
+if [ ! -f ${POST_AUDIO} ]; then
+  gtts-cli -f ${POST_TXT} -o ${POST_AUDIO}
+fi
 
 AUDIO_LENGTH=`ffmpeg -i ${POST_AUDIO} 2>&1 |grep -oP "[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{2}"`
 echo Generated TTS audio file length: $AUDIO_LENGTH
 
 echo Generating video from image $POST_IMG
-
+echo *** generating post video from txt and img***
+echo $POST_AUDIO
+echo $POST_IMG
+echo $POST_AUDIO
 
 ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
 
