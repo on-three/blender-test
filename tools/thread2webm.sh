@@ -47,7 +47,9 @@ for POST_NUM in $(cat < ${POST_LIST}); do
   POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
 
   # generate an image and textfile off the post
-  phantomjs tools/get_post.js "$THREAD_URL" "$POST_NUM" "$WORKING_DIR"
+  if [ ! -f $POST_IMG ] || [ ! -f $POST_TXT ]; then
+    phantomjs tools/get_post.js "$THREAD_URL" "$POST_NUM" "$WORKING_DIR"
+  fi
 
   # fail if we don't have the resultant .png and .txt files
   if [ ! -f $POST_IMG ]; then
@@ -61,7 +63,9 @@ for POST_NUM in $(cat < ${POST_LIST}); do
 
 
   # generate TTS audio
-  gtts-cli -f ${POST_TXT} -o ${POST_AUDIO}
+  if [ ! -f $POST_AUDIO ]; then
+    gtts-cli -f ${POST_TXT} -o ${POST_AUDIO}
+  fi
 
   AUDIO_LENGTH=`ffmpeg -i ${POST_AUDIO} 2>&1 |grep -oP "[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{2}"`
   echo Generated TTS audio file length: $AUDIO_LENGTH
@@ -70,6 +74,10 @@ for POST_NUM in $(cat < ${POST_LIST}); do
 
   #-video_track_timescale 29971 -ac 1
   #ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
+  echo ***** generating video off single post *****
+  echo $POST_AUDIO
+  echo $POST_IMG
+  echo $POST_VIDEO
   ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -video_track_timescale 29971 -ac 1 -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
   
   # append created file to our list
@@ -81,7 +89,8 @@ done
 
 
 #ffmpeg -f concat -safe 0 -i $VIDEOS_LIST -c copy ${THREAD_WEBM}.mp4
-ffmpeg -f concat -safe 0 -i $VIDEOS_LIST -c copy test.mp4
+echo ******** generating video from video list $VIDEO_LIST *********
+ffmpeg -f concat -safe 0 -i $VIDEO_LIST -c copy test.mp4
 
 
 ffmpeg -i test.mp4 ${THREAD_WEBM}
