@@ -35,7 +35,8 @@ POST_TXT=${WORKING_DIR}/${POST_NUM}.txt
 POST_AUDIO=${WORKING_DIR}/${POST_NUM}.mp3
 POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
 POST_WEBM=${POST_NUM}.webm
-IMG_SIZE=1024x768
+#IMG_SIZE=1024x768
+IMG_SIZE=640X480
 NO_TEXT_DURATION_S=4
 # generate an image and textfile off the post
 # there will ALWAYS be a POST_IMG afterwards but there may not be a POST_TXT
