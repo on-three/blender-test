@@ -36,9 +36,10 @@ POST_AUDIO=${WORKING_DIR}/${POST_NUM}.mp3
 POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
 POST_WEBM=${POST_NUM}.webm
 IMG_SIZE=1024x768
-
+NO_TEXT_DURATION_S=4
 # generate an image and textfile off the post
-if [ ! -f $POST_TXT ] || [ ! -f $POST_IMG ]; then
+# there will ALWAYS be a POST_IMG afterwards but there may not be a POST_TXT
+if [ ! -f $POST_IMG ]; then
   phantomjs tools/get_post.js "$POST_URL" "$WORKING_DIR"
   convert $POST_IMG -gravity center -background black -resize $IMG_SIZE -extent $IMG_SIZE $POST_IMG
 fi
@@ -48,14 +49,17 @@ if [ ! -f $POST_IMG ]; then
   echo "Post img file does not exist. FAILING"
   exit -1
 fi
-if [ ! -f $POST_TXT ]; then
-  echo "Post text does not exist. FAILING"
-  exit -1
-fi
 
-# generate TTS audio
+# generate TTS audio or silence if there's no post text
 if [ ! -f ${POST_AUDIO} ]; then
-  gtts-cli -f ${POST_TXT} -o ${POST_AUDIO}
+  if [ ! -f ${POST_TXT} ]; then
+    #generate silence of N seconds for posts with no text
+    ffmpeg -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=24000 -t ${NO_TEXT_DURATION_S} ${POST_AUDIO}
+  else
+    # generate TTS audio of post via webservice.
+    # TODO: randomize voices.
+    gtts-cli -f ${POST_TXT} -o ${POST_AUDIO}
+  fi
 fi
 
 AUDIO_LENGTH=`ffmpeg -i ${POST_AUDIO} 2>&1 |grep -oP "[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{2}"`
@@ -67,7 +71,7 @@ echo $POST_AUDIO
 echo $POST_IMG
 echo $POST_VIDEO
 
-ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -shortest -strict -2 $POST_VIDEO
+ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -ab 112k -c:v libx264 -s $IMG_SIZE -shortest -strict -2 $POST_VIDEO
 
 # TODO generate directly to webm
 ffmpeg -y -i $POST_VIDEO $POST_WEBM
