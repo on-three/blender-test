@@ -35,6 +35,10 @@ ifeq ($(SCRIPT), trump)
 SCRIPT_ARGS += --blendfile ./models/trump.blend
 endif
 
+ifeq ($(SCRIPT), jannie)
+SCRIPT_ARGS += --blendfile ./models/jannie.blend
+endif
+
 # tools
 BLENDER ?= blender
 VIDEO_PLAYER ?= mpv
@@ -50,9 +54,10 @@ DISPLAY := chromium-browser
 #	./scripts/phonemes.sh $(@D)
 #	touch $@
 
-$(TARGET): $(MOV_OUT) $(SUBS_FILE)
+#$(TARGET): $(MOV_OUT) $(SUBS_FILE)
+$(TARGET): $(MOV_OUT)
 	# we hardcode the subs file onto the webm (but not MOV)
-	$(FFMPEG) -i $(MOV_OUT) -vf subtitles=$(SUBS_FILE) $@
+	$(FFMPEG) -i $(MOV_OUT) $@
 
 $(SUBS_FILE):
 	# if our subs file wasn't generated during movie rendering this creates an empty default
