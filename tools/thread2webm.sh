@@ -46,7 +46,8 @@ for POST_NUM in $(cat < ${POST_LIST}); do
   POST_TXT=${WORKING_DIR}/${POST_NUM}.txt
   POST_AUDIO=${WORKING_DIR}/${POST_NUM}.mp3
   POST_VIDEO=${WORKING_DIR}/${POST_NUM}.mp4
-  IMG_SIZE=1024x768
+  POST_TS=${WORKING_DIR}/${POST_NUM}.ts
+  IMG_SIZE=640x480
   NO_TEXT_DURATION_S=4
 
   # generate an image and textfile off the post
@@ -81,13 +82,12 @@ for POST_NUM in $(cat < ${POST_LIST}); do
   echo $POST_AUDIO
   echo $POST_IMG
   echo $POST_VIDEO
-  ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -video_track_timescale 29971 -ac 1 -ab 112k -c:v libx264 -shortest -strict -2 ${POST_VIDEO}.tmp.mp4
+  ffmpeg -y -loop 1 -i $POST_IMG -i $POST_AUDIO -c:a aac -video_track_timescale 29971 -ac 1 -ab 112k -c:v libx264 -shortest -strict -2 ${POST_VIDEO}
   # reencode to a uniform format to ensure file sync
-  ffmpeg -i ${POST_VIDEO}.tmp.mp4 -acodec libvo_aacenc -vcodec libx264 -s $IMG_SIZE -r 60 -strict experimental $POST_VIDEO
-
+  ffmpeg -i ${POST_VIDEO} -map 0 -c copy -f mpegts -bsf h264_mp4toannexb ${POST_TS}
+  
   # append created file to our list
-  echo Added video $POST_VIDEO to $VIDEO_LIST
-  #echo ${POST_VIDEO} >> $VIDEO_LIST
+  echo Added video $POST_TS to $VIDEO_LIST
   echo file \'${POST_VIDEO}\' >> $VIDEO_LIST
 
 done
@@ -95,10 +95,9 @@ done
 
 #ffmpeg -f concat -safe 0 -i $VIDEOS_LIST -c copy ${THREAD_WEBM}.mp4
 echo ******** generating video from video list $VIDEO_LIST *********
-ffmpeg -y -f concat -safe 0 -i $VIDEO_LIST -c copy test.mp4
+ffmpeg -y -f concat -safe 0 -i $VIDEO_LIST ${THREAD_WEBM}
 
-
-ffmpeg -y -i test.mp4 ${THREAD_WEBM}
+#ffmpeg -y -i test.mp4 ${THREAD_WEBM}
 
 if $UPLOAD ; then
   # upload to mixtape.moe
