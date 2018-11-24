@@ -19,6 +19,7 @@ class Script(object):
     self._filepath = filepath
     self._lines = []
     self._speaker_map = {}
+    self._model = None # no script specific model
     i = 1
     with open(self._filepath) as f:
       for line in f:

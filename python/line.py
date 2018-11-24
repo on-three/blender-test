@@ -123,6 +123,13 @@ class Line(object):
     if not len(line):
       return index
 
+    # handle specific directions like "SCENE: XXX" that define
+    # specific script properties, and attach them to the script itself
+    if line.startswith("SCENE:"):
+      script._model = line[len("SCENE:"):].strip()
+      print("Setting model for script to: " + script._model)
+      return index
+
     # first remove speaker at start of line if there is one
     # There may or may not be a speaker for a line
     speaker = None
@@ -132,6 +139,7 @@ class Line(object):
     speaker_match = speaker_regex.match(line)
     if speaker_match:
       speaker_name = speaker_match.groupdict()['speaker']
+      
       if not speaker_name in script._speaker_map:
         speaker = Speaker(speaker_name)
         script._speaker_map[speaker_name] = speaker

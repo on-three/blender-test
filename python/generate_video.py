@@ -144,18 +144,6 @@ def generate_video():
   animation_controller._on_utterance = on_utterance_frame
   animation_controller._on_video = on_video_frame
 
-
-  # Load our default scene and assets.
-  #bpy.ops.wm.open_mainfile(filepath="./models/default.blend")
-  bpy.ops.wm.open_mainfile(filepath=args.blendfile)
-
-
-  context = bpy.context
-  scene = bpy.context.scene
-  world = bpy.context.scene.world
-  if not scene.sequence_editor:
-    scene.sequence_editor_create()
-
   # end_frame tracks the length in total frames of generated video
   end_frame = 0
   
@@ -163,6 +151,19 @@ def generate_video():
   print("opening file: " + script_filepath)
   script = Script(script_filepath, asset_dir=args.assetdir)
 
+  # if the script provides a specific model to use, load it rather
+  # than the one provided via comman line arg
+  if script._model:
+    bpy.ops.wm.open_mainfile(filepath=script._model)
+  else:
+    bpy.ops.wm.open_mainfile(filepath=args.blendfile)
+
+  context = bpy.context
+  scene = bpy.context.scene
+  world = bpy.context.scene.world
+  if not scene.sequence_editor:
+    scene.sequence_editor_create()
+  
   # for debugging just add an enter action at frame zero
   do_dummy_actions = False
   if do_dummy_actions:
